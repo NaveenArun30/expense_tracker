@@ -499,7 +499,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         ),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     }
   }
 }

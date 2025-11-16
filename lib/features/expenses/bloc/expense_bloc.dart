@@ -73,7 +73,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       }
 
       // Get all expenses for the user
-      final expenses = await SupabaseService.getAllExpenses(userId: currentUserId);
+      final expenses = await SupabaseService.getAllExpenses(
+        userId: currentUserId,
+      );
 
       final categoryTotals = <String, double>{};
       for (var expense in expenses) {
@@ -257,7 +259,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ) async {
     try {
       await SupabaseService.addExpense(event.expense);
-      add(RefreshExpenses());
+      add(LoadExpenses()); // Refresh instantly
     } catch (e) {
       emit(ExpenseError('Failed to add expense: $e'));
     }
