@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/widgets/shimmer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -69,40 +70,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         body: SafeArea(
           child: BlocBuilder<ExpenseBloc, ExpenseState>(
             builder: (context, state) {
-              return CustomScrollView(
-                slivers: [
-                  _buildAppBar(context),
-                  SliverToBoxAdapter(
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: child,
+              if (state is ExpenseLoading) {
+                return CustomScrollView(
+                  slivers: [
+                    _buildAppBar(context),
+                    SliverToBoxAdapter(child: DashboardShimmerWidget()),
+                  ],
+                );
+              }
+
+              if (state is ExpenseLoaded) {
+                return CustomScrollView(
+                  slivers: [
+                    _buildAppBar(context),
+                    SliverToBoxAdapter(
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: SlideTransition(
+                              position: _slideAnimation,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              _buildBalanceCard(state),
+                              const SizedBox(height: 20),
+                              _buildQuickStats(state),
+                              const SizedBox(height: 20),
+                              _buildActionCards(context, state),
+                              const SizedBox(height: 20),
+                              _buildMonthlyExpenseCard(context, state),
+                              const SizedBox(height: 20),
+                            ],
                           ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            _buildBalanceCard(state),
-                            const SizedBox(height: 20),
-                            _buildQuickStats(state),
-                            const SizedBox(height: 20),
-                            _buildActionCards(context, state),
-                            const SizedBox(height: 20),
-                            _buildMonthlyExpenseCard(context, state),
-                            const SizedBox(height: 20),
-                          ],
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
+                  ],
+                );
+              }
+
+              return const SizedBox.shrink();
             },
           ),
         ),

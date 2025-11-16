@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:excel/excel.dart';
-import 'package:pdf/pdf.dart';
 import '../../../model/report_model.dart';
 import 'report_event.dart';
 import 'report_state.dart';
