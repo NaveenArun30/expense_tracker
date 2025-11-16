@@ -19,6 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
+  bool _isLoading = false; // Local loading state
 
   @override
   void dispose() {
@@ -49,7 +50,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin() {
+    print('Logging in with ${_emailController.text}');
+
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      
       context.read<AuthBloc>().add(
         LoginRequested(_emailController.text.trim(), _passwordController.text),
       );
@@ -64,7 +71,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToForgotPassword() {
-    // Implement password reset
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your email address first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
     context.read<AuthBloc>().add(
       PasswordResetRequested(_emailController.text.trim()),
     );
@@ -76,30 +96,57 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.grey[50],
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
+          print('LoginScreen - State changed to: ${state.runtimeType}');
+          
+          // Reset loading state for all state changes
+          if (_isLoading) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+          
           if (state is AuthAuthenticated) {
+            print('LoginScreen - Navigating to HomeScreen');
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => const HomeScreen()),
               (route) => false,
             );
           } else if (state is AuthError) {
+            print('LoginScreen - Showing error: ${state.message}');
+            ScaffoldMessenger.of(context).clearSnackBars(); // Clear any existing snackbars
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.red[600],
+                duration: const Duration(seconds: 4),
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             );
           } else if (state is AuthPasswordResetSent) {
+            print('LoginScreen - Password reset sent: ${state.message}');
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.green,
+                backgroundColor: Colors.green[600],
                 duration: const Duration(seconds: 5),
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             );
           }
         },
         builder: (context, state) {
+          print('LoginScreen - Building with state: ${state.runtimeType}, isLoading: $_isLoading');
+          
           return SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -122,9 +169,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Sign in to continue tracking your expenses',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 50),
 
@@ -213,22 +260,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         TextButton(
-                          onPressed: () {
-                            if (_emailController.text.trim().isNotEmpty) {
-                              _navigateToForgotPassword();
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please enter your email address first'),
-                                  backgroundColor: Colors.orange,
-                                ),
-                              );
-                            }
-                          },
+                          onPressed: _isLoading ? null : _navigateToForgotPassword,
                           child: Text(
                             'Forgot Password?',
                             style: TextStyle(
-                              color: Colors.blue[600],
+                              color: _isLoading ? Colors.grey[400] : Colors.blue[600],
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -243,16 +279,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: state is AuthLoading ? null : _handleLogin,
+                        onPressed: _isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[600],
+                          backgroundColor: _isLoading ? Colors.grey[400] : Colors.blue[600],
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: state is AuthLoading
+                        child: _isLoading
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
@@ -297,11 +333,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     _buildSocialLoginButton(
                       icon: Icons.g_mobiledata,
                       text: 'Continue with Google',
-                      onPressed: () {
-                        // Implement Google login later
+                      onPressed: _isLoading ? null : () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Google login coming soon!'),
+                            duration: Duration(seconds: 2),
                           ),
                         );
                       },
@@ -310,11 +346,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     _buildSocialLoginButton(
                       icon: Icons.apple,
                       text: 'Continue with Apple',
-                      onPressed: () {
-                        // Implement Apple login later
+                      onPressed: _isLoading ? null : () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Apple login coming soon!'),
+                            duration: Duration(seconds: 2),
                           ),
                         );
                       },
@@ -324,19 +360,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     // Register Link
                     Center(
                       child: TextButton(
-                        onPressed: _navigateToRegister,
+                        onPressed: _isLoading ? null : _navigateToRegister,
                         child: RichText(
                           text: TextSpan(
                             text: "Don't have an account? ",
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: _isLoading ? Colors.grey[400] : Colors.grey[600],
                               fontSize: 16,
                             ),
                             children: [
                               TextSpan(
                                 text: 'Sign Up',
                                 style: TextStyle(
-                                  color: Colors.blue[600],
+                                  color: _isLoading ? Colors.grey[400] : Colors.blue[600],
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -373,14 +409,21 @@ class _LoginScreenState extends State<LoginScreen> {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       obscureText: obscureText,
-      style: const TextStyle(fontSize: 16),
+      enabled: !_isLoading,
+      style: TextStyle(
+        fontSize: 16,
+        color: _isLoading ? Colors.grey[500] : Colors.black,
+      ),
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        prefixIcon: Icon(prefixIcon, color: Colors.grey[600]),
+        prefixIcon: Icon(
+          prefixIcon, 
+          color: _isLoading ? Colors.grey[400] : Colors.grey[600]
+        ),
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: _isLoading ? Colors.grey[100] : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -388,6 +431,10 @@ class _LoginScreenState extends State<LoginScreen> {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -412,25 +459,30 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSocialLoginButton({
     required IconData icon,
     required String text,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: OutlinedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, color: Colors.grey[700]),
+        icon: Icon(
+          icon, 
+          color: _isLoading ? Colors.grey[400] : Colors.grey[700]
+        ),
         label: Text(
           text,
           style: TextStyle(
-            color: Colors.grey[700],
+            color: _isLoading ? Colors.grey[400] : Colors.grey[700],
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
         ),
         style: OutlinedButton.styleFrom(
-          backgroundColor: Colors.white,
-          side: BorderSide(color: Colors.grey[300]!),
+          backgroundColor: _isLoading ? Colors.grey[50] : Colors.white,
+          side: BorderSide(
+            color: _isLoading ? Colors.grey[200]! : Colors.grey[300]!
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

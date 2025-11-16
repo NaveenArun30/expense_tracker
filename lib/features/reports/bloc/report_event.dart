@@ -1,7 +1,6 @@
 abstract class ReportEvent {}
 
-class GenerateReport extends ReportEvent {
-  final int month;
-  final int year;
-  GenerateReport(this.month, this.year);
+class UploadFile extends ReportEvent {
+  final String filePath;
+  UploadFile(this.filePath);
 }

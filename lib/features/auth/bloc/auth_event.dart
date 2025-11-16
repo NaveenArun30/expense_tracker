@@ -1,5 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 abstract class AuthEvent {}
 
 class CheckAuthStatus extends AuthEvent {}
