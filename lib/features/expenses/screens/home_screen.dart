@@ -24,12 +24,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  late ExpenseBloc _expenseBloc;
 
   @override
   void initState() {
     super.initState();
-    _expenseBloc = ExpenseBloc()..add(LoadExpenses());
+    // Load expenses using the provided bloc
+    context.read<ExpenseBloc>().add(LoadExpenses());
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -57,71 +57,67 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _expenseBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _expenseBloc,
-      child: Scaffold(
-        backgroundColor: AppConstants.backgroundColor,
-        body: SafeArea(
-          child: BlocBuilder<ExpenseBloc, ExpenseState>(
-            builder: (context, state) {
-              if (state is ExpenseLoading) {
-                return CustomScrollView(
-                  slivers: [
-                    _buildAppBar(context),
-                    SliverToBoxAdapter(child: DashboardShimmerWidget()),
-                  ],
-                );
-              }
+    return Scaffold(
+      backgroundColor: AppConstants.backgroundColor,
+      body: SafeArea(
+        child: BlocBuilder<ExpenseBloc, ExpenseState>(
+          builder: (context, state) {
+            if (state is ExpenseLoading) {
+              return CustomScrollView(
+                slivers: [
+                  _buildAppBar(context),
+                  SliverToBoxAdapter(child: DashboardShimmerWidget()),
+                ],
+              );
+            }
 
-              if (state is ExpenseLoaded) {
-                return CustomScrollView(
-                  slivers: [
-                    _buildAppBar(context),
-                    SliverToBoxAdapter(
-                      child: AnimatedBuilder(
-                        animation: _animationController,
-                        builder: (context, child) {
-                          return FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: SlideTransition(
-                              position: _slideAnimation,
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              _buildBalanceCard(state),
-                              const SizedBox(height: 20),
-                              _buildQuickStats(state),
-                              const SizedBox(height: 20),
-                              _buildActionCards(context, state),
-                              const SizedBox(height: 20),
-                              _buildMonthlyExpenseCard(context, state),
-                              const SizedBox(height: 20),
-                            ],
+            if (state is ExpenseLoaded) {
+              return CustomScrollView(
+                slivers: [
+                  _buildAppBar(context),
+                  SliverToBoxAdapter(
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: SlideTransition(
+                            position: _slideAnimation,
+                            child: child,
                           ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            _buildBalanceCard(state),
+                            const SizedBox(height: 20),
+                            _buildQuickStats(state),
+                            const SizedBox(height: 20),
+                            _buildActionCards(context, state),
+                            const SizedBox(height: 20),
+                            _buildMonthlyExpenseCard(context, state),
+                            const SizedBox(height: 20),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                );
-              }
+                  ),
+                ],
+              );
+            }
 
-              return const SizedBox.shrink();
-            },
-          ),
+            return const SizedBox.shrink();
+          },
         ),
-        floatingActionButton: _buildFAB(context),
       ),
+      floatingActionButton: _buildFAB(context),
     );
   }
 
@@ -647,16 +643,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (modalContext) => BlocProvider.value(
-        value: _expenseBloc,
-        child: MonthYearPicker(
-          currentDate: currentMonth,
-          onMonthYearSelected: (selectedDate) {
-            // Trigger the ExpenseBloc to load data for the selected month
-            _expenseBloc.add(LoadExpenses(month: selectedDate));
-            Navigator.pop(modalContext);
-          },
-        ),
+      builder: (modalContext) => MonthYearPicker(
+        currentDate: currentMonth,
+        onMonthYearSelected: (selectedDate) {
+          // Use context.read instead of _expenseBloc
+          context.read<ExpenseBloc>().add(LoadExpenses(month: selectedDate));
+          Navigator.pop(modalContext);
+        },
       ),
     );
   }
@@ -699,7 +692,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
           // Refresh data after adding an expense
           if (result == true && mounted) {
-            _expenseBloc.add(RefreshExpenses());
+            context.read<ExpenseBloc>().add(RefreshExpenses());
           }
         },
         backgroundColor: AppConstants.primaryColor,
