@@ -100,4 +100,43 @@ class AppConstants {
     Color(0xFFFDCB6E),
     Color(0xFFFC7E46),
   ];
+    // Income Sources
+  static const List<String> incomeSources = [
+    'Salary',
+    'Business',
+    'Freelance',
+    'Investment',
+    'Rental',
+    'Gift',
+    'Bonus',
+    'Other',
+  ];
+
+  static const Map<String, IconData> incomeSourceIcons = {
+    'Salary': Icons.work,
+    'Business': Icons.business_center,
+    'Freelance': Icons.laptop_mac,
+    'Investment': Icons.trending_up,
+    'Rental': Icons.home,
+    'Gift': Icons.card_giftcard,
+    'Bonus': Icons.emoji_events,
+    'Other': Icons.attach_money,
+  };
+
+  static const Map<String, Color> incomeSourceColors = {
+    'Salary': Color(0xFF20BF55),
+    'Business': Color(0xFF01BAEF),
+    'Freelance': Color(0xFF9C94FF),
+    'Investment': Color(0xFFFDCB6E),
+    'Rental': Color(0xFF4ECDC4),
+    'Gift': Color(0xFFFD79A8),
+    'Bonus': Color(0xFFFFD700),
+    'Other': Color(0xFF96CEB4),
+  };
+
+  static const List<Color> incomeGradient = [
+    Color(0xFF20BF55),
+    Color(0xFF01BAEF),
+  ];
+
 }

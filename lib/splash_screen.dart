@@ -10,6 +10,8 @@ import 'package:expense_tracker_app/features/auth/screens/login_screen.dart';
 import 'package:expense_tracker_app/features/expenses/screens/home_screen.dart';
 import 'package:expense_tracker_app/constants/app_constants.dart';
 
+import 'features/income/screens/bottom_nav_screen.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -117,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               authState is AuthAuthenticated
-              ? const HomeScreen()
+              ? const MainNavigationScreen()
               : const LoginScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(

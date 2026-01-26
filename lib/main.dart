@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/theme_bloc/theme_bloc.dart';
 import 'features/expenses/bloc/expense_bloc.dart';
+import 'features/income/bloc/income_bloc.dart';
 
 void main() async {
   await Supabase.initialize(
@@ -18,6 +19,7 @@ void main() async {
         BlocProvider(create: (_) => ThemeBloc()),
         BlocProvider(create: (_) => ExpenseBloc()),
         BlocProvider(create: (_) => AuthBloc()),
+        BlocProvider(create: (_) => IncomeBloc()),
       ],
       child: const MyApp(),
     ),

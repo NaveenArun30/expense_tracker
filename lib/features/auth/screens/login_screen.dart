@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../income/screens/bottom_nav_screen.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -109,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
             print('LoginScreen - Navigating to HomeScreen');
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
               (route) => false,
             );
           } else if (state is AuthError) {

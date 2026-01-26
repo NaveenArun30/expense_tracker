@@ -485,6 +485,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
             : _descriptionController.text.trim(),
         date: _selectedDate,
         userId: currentUserId, // Now using actual Supabase user ID
+        accountId: ""
       );
 
       context.read<ExpenseBloc>().add(AddExpense(expense));

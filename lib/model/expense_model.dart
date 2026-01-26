@@ -6,6 +6,8 @@ class ExpenseModel {
   final String? description;
   final DateTime date;
   final String userId;
+    final String accountId; // ADD THIS
+
 
   ExpenseModel({
     this.id,
@@ -15,6 +17,8 @@ class ExpenseModel {
     this.description,
     required this.date,
     required this.userId,
+        required this.accountId, // ADD THIS
+
   });
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class ExpenseModel {
       description: json['description'],
       date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       userId: json['user_id'] ?? '',
+            accountId: json['account_id'], // ADD THIS
+
     );
   }
 
@@ -37,6 +43,8 @@ class ExpenseModel {
       'description': description,
       'date': date.toIso8601String(),
       'user_id': userId,
+            'account_id': accountId, // ADD THIS
+
     };
   }
 
@@ -57,6 +65,7 @@ class ExpenseModel {
       description: description ?? this.description,
       date: date ?? this.date,
       userId: userId ?? this.userId,
+      accountId: accountId, 
     );
   }
 }

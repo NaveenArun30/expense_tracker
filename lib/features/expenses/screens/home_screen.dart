@@ -21,11 +21,15 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   late AnimationController _animationController;
   late AnimationController _floatingController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -58,12 +62,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     )..repeat(reverse: true);
 
     _animationController.forward();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-      ),
-    );
   }
 
   @override
@@ -75,63 +73,71 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    // Set status bar color based on app bar
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
+
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      body: SafeArea(
-        child: BlocBuilder<ExpenseBloc, ExpenseState>(
-          builder: (context, state) {
-            if (state is ExpenseLoading) {
-              return CustomScrollView(
-                slivers: [
-                  _buildAppBar(context),
-                  SliverToBoxAdapter(child: DashboardShimmerWidget()),
-                ],
-              );
-            }
+      body: BlocBuilder<ExpenseBloc, ExpenseState>(
+        builder: (context, state) {
+          if (state is ExpenseLoading) {
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context),
+                SliverToBoxAdapter(child: DashboardShimmerWidget()),
+              ],
+            );
+          }
 
-            if (state is ExpenseLoaded) {
-              return CustomScrollView(
-                slivers: [
-                  _buildAppBar(context),
-                  SliverToBoxAdapter(
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SlideTransition(
-                            position: _slideAnimation,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            _buildBalanceCard(state),
-                            const SizedBox(height: 20),
-                            _buildQuickStats(state),
-                            const SizedBox(height: 20),
-                            _buildActionCards(context, state),
-                            const SizedBox(height: 20),
-                            _buildMonthlyExpenseCard(context, state),
-                            const SizedBox(height: 100),
-                          ],
+          if (state is ExpenseLoaded) {
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context),
+                SliverToBoxAdapter(
+                  child: AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: child,
                         ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          _buildBalanceCard(state),
+                          const SizedBox(height: 20),
+                          _buildQuickStats(state),
+                          const SizedBox(height: 20),
+                          _buildActionCards(context, state),
+                          const SizedBox(height: 20),
+                          _buildMonthlyExpenseCard(context, state),
+                          const SizedBox(height: 100),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              );
-            }
+                ),
+              ],
+            );
+          }
 
-            return const SizedBox.shrink();
-          },
-        ),
+          return const SizedBox.shrink();
+        },
       ),
       floatingActionButton: _buildFAB(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -142,6 +148,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       pinned: true,
       elevation: 0,
       backgroundColor: AppConstants.primaryColor,
+      automaticallyImplyLeading: false, // Remove back button
       flexibleSpace: FlexibleSpaceBar(
         title: const Text(
           'Expense Tracker',
@@ -222,14 +229,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
-              Icons.receipt_long_rounded,
+              Icons.settings_rounded,
               color: AppConstants.surfaceColor,
               size: 20,
             ),
           ),
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ReportScreen()),
+            MaterialPageRoute(builder: (context) => SettingsScreen()),
           ),
         ),
         const SizedBox(width: 8),
@@ -868,9 +875,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildFAB(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(colors: AppConstants.primaryGradient),
         boxShadow: [
           BoxShadow(
@@ -881,68 +887,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () async {
-            final result = await Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const AddExpenseScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                      const begin = Offset(0.0, 1.0);
-                      const end = Offset.zero;
-                      const curve = Curves.easeOutCubic;
-                      var tween = Tween(
-                        begin: begin,
-                        end: end,
-                      ).chain(CurveTween(curve: curve));
-                      return SlideTransition(
-                        position: animation.drive(tween),
-                        child: child,
-                      );
-                    },
-              ),
-            );
-
-            if (result == true && mounted) {
-              context.read<ExpenseBloc>().add(RefreshExpenses());
-            }
-          },
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Add Expense',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
+      child: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  const AddExpenseScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    const begin = Offset(0.0, 1.0);
+                    const end = Offset.zero;
+                    const curve = Curves.easeOutCubic;
+                    var tween = Tween(
+                      begin: begin,
+                      end: end,
+                    ).chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
             ),
-          ),
-        ),
+          );
+
+          if (result == true && mounted) {
+            context.read<ExpenseBloc>().add(RefreshExpenses());
+          }
+        },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
       ),
     );
   }
