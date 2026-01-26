@@ -1,5 +1,3 @@
-// Update your existing AddExpense event handler in ExpenseBloc
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../services/supabase_service.dart';
@@ -19,6 +17,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     on<LoadComparisonData>(_onLoadComparisonData);
     on<LoadAllExpenses>(_onLoadAllExpenses);
   }
+
   Future<void> _onLoadExpenses(
     LoadExpenses event,
     Emitter<ExpenseState> emit,
@@ -37,6 +36,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         month: month,
       );
 
+      // Load accounts as well
+      final accounts = await SupabaseService.getAccounts(userId: currentUserId);
+
       final categoryTotals = await SupabaseService.getCategoryWiseExpenses(
         userId: currentUserId,
         month: month,
@@ -50,6 +52,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(
         ExpenseLoaded(
           expenses: expenses,
+          accounts: accounts,
           totalAmount: totalAmount,
           categoryTotals: categoryTotals,
           currentMonth: month,
@@ -76,6 +79,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         userId: currentUserId,
       );
 
+      final accounts = await SupabaseService.getAccounts(userId: currentUserId);
+
       final categoryTotals = <String, double>{};
       for (var expense in expenses) {
         categoryTotals[expense.category] =
@@ -90,6 +95,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(
         ExpenseLoaded(
           expenses: expenses,
+          accounts: accounts,
           totalAmount: totalAmount,
           categoryTotals: categoryTotals,
           currentMonth: DateTime.now(),
@@ -118,6 +124,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         endDate: event.endDate,
       );
 
+      final accounts = await SupabaseService.getAccounts(userId: currentUserId);
+
       final categoryTotals = <String, double>{};
       for (var expense in expenses) {
         categoryTotals[expense.category] =
@@ -132,6 +140,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(
         ExpenseLoaded(
           expenses: expenses,
+          accounts: accounts,
           totalAmount: totalAmount,
           categoryTotals: categoryTotals,
           currentMonth: event.startDate,
@@ -159,6 +168,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         year: event.year,
       );
 
+      final accounts = await SupabaseService.getAccounts(userId: currentUserId);
+
       final monthlyTotals = <int, double>{};
       final categoryTotals = <String, double>{};
 
@@ -177,6 +188,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       emit(
         YearlyExpenseLoaded(
           expenses: expenses,
+          accounts: accounts,
           monthlyTotals: monthlyTotals,
           categoryTotals: categoryTotals,
           year: event.year,
@@ -258,28 +270,28 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       // Add expense
       await SupabaseService.addExpense(event.expense);
 
-      // Deduct from account balance
-      // Get all accounts for the user
-      final accounts = await SupabaseService.getAccounts(userId: userId);
+      // Only deduct from account if accountId is provided
+      if (event.accountId != null && event.accountId!.isNotEmpty) {
+        // Get the specific account
+        final accounts = await SupabaseService.getAccounts(userId: userId);
 
-      if (accounts.isNotEmpty) {
-        // Find account with sufficient balance
-        var accountToDeduct = accounts.firstWhere(
-          (acc) => acc.balance >= event.expense.amount,
-          orElse: () => accounts
-              .first, // Use first account if none have sufficient balance
-        );
+        try {
+          final account = accounts.firstWhere(
+            (acc) => acc.id == event.accountId,
+          );
 
-        // Calculate new balance
-        final newBalance = accountToDeduct.balance - event.expense.amount;
+          // Calculate new balance
+          final newBalance = account.balance - event.expense.amount;
 
-        // Update account balance
-        await SupabaseService.updateAccountBalance(
-          accountId: accountToDeduct.id!,
-          newBalance: newBalance >= 0
-              ? newBalance
-              : 0, // Prevent negative balance
-        );
+          // Update account balance (allow negative balance)
+          await SupabaseService.updateAccountBalance(
+            accountId: event.accountId!,
+            newBalance: newBalance,
+          );
+        } catch (e) {
+          // Account not found, continue without updating balance
+          print('Account not found or error updating balance: $e');
+        }
       }
 
       add(LoadExpenses()); // Refresh expenses

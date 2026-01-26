@@ -26,6 +26,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ExpenseBloc>().add(LoadExpenses());
+    });
   }
 
   @override
@@ -45,54 +48,95 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ExpenseBloc()..add(LoadExpenses()),
-      child: Scaffold(
-        backgroundColor: AppConstants.backgroundColor,
-        appBar: AppBar(
-          title: const Text(
-            'Analytics',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppConstants.textOnPrimary,
+    return Scaffold(
+      backgroundColor: AppConstants.backgroundColor,
+      appBar: AppBar(
+        title: const Text(
+          'Analytics',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppConstants.textOnPrimary,
+          ),
+        ),
+        backgroundColor: AppConstants.primaryColor,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppConstants.textOnPrimary),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: AppConstants.primaryGradient,
             ),
           ),
-          backgroundColor: AppConstants.primaryColor,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: AppConstants.textOnPrimary),
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: AppConstants.primaryGradient,
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: AppConstants.textOnPrimary,
+          labelColor: AppConstants.textOnPrimary,
+          unselectedLabelColor: AppConstants.textOnPrimary.withOpacity(0.7),
+          tabs: const [
+            Tab(text: 'Overview'),
+            Tab(text: 'Categories'),
+            Tab(text: 'Trends'),
+          ],
+        ),
+      ),
+      body: BlocConsumer<ExpenseBloc, ExpenseState>(
+        listener: (context, state) {
+          if (state is ExpenseError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
               ),
-            ),
-          ),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: AppConstants.textOnPrimary,
-            labelColor: AppConstants.textOnPrimary,
-            unselectedLabelColor: AppConstants.textOnPrimary.withOpacity(0.7),
-            tabs: const [
-              Tab(text: 'Overview'),
-              Tab(text: 'Categories'),
-              Tab(text: 'Trends'),
-            ],
-          ),
-        ),
-        body: BlocBuilder<ExpenseBloc, ExpenseState>(
-          builder: (context, state) {
-            return TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(context, state),
-                _buildCategoriesTab(context, state),
-                _buildTrendsTab(context, state),
-              ],
             );
-          },
-        ),
+          }
+        },
+        builder: (context, state) {
+          if (state is ExpenseLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is ExpenseError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading analytics',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(state.message, textAlign: TextAlign.center),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<ExpenseBloc>().add(LoadExpenses());
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildOverviewTab(context, state),
+              _buildCategoriesTab(context, state),
+              _buildTrendsTab(context, state),
+            ],
+          );
+        },
       ),
     );
   }
@@ -366,7 +410,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Daily Spending Trend',
+              'Monthly Calendar',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -374,17 +418,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              height: 200,
-              child: state.expenses.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No expenses for this period',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    )
-                  : LineChart(_buildLineChartData(state.expenses)),
-            ),
+            state.expenses.isEmpty
+                ? Center(
+                    child: Text(
+                      'No expenses for this period',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  )
+                : _buildCalendarView(state.expenses),
           ],
         ),
       );
@@ -392,16 +433,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return const SizedBox.shrink();
   }
 
-  LineChartData _buildLineChartData(List<ExpenseModel> expenses) {
-    if (expenses.isEmpty) {
-      return LineChartData(
-        lineBarsData: [],
-        titlesData: FlTitlesData(show: false),
-        borderData: FlBorderData(show: false),
-      );
-    }
-
-    // Group expenses by day of month
+  Widget _buildCalendarView(List<ExpenseModel> expenses) {
+    // Group expenses by day
     Map<int, double> dailyTotals = {};
     for (var expense in expenses) {
       final day = expense.date.day;
@@ -409,75 +442,106 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     }
 
     final daysInMonth = DateTime(_selectedYear, _selectedMonth + 1, 0).day;
-    List<FlSpot> spots = [];
-    for (int day = 1; day <= daysInMonth; day++) {
-      spots.add(FlSpot(day.toDouble(), dailyTotals[day] ?? 0));
-    }
+    final firstDayOfMonth = DateTime(_selectedYear, _selectedMonth, 1);
+    final startingWeekday = firstDayOfMonth.weekday % 7; // 0 = Sunday
 
-    final maxY = dailyTotals.values.isEmpty
-        ? 100.0
-        : dailyTotals.values.reduce((a, b) => a > b ? a : b) * 1.2;
+    final weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-    return LineChartData(
-      gridData: FlGridData(
-        show: true,
-        drawVerticalLine: false,
-        horizontalInterval: maxY / 5,
-        getDrawingHorizontalLine: (value) {
-          return FlLine(color: Colors.grey[200], strokeWidth: 1);
-        },
-      ),
-      titlesData: FlTitlesData(
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            reservedSize: 40,
-            getTitlesWidget: (value, meta) {
-              return Text(
-                '${value.toInt()}',
-                style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-              );
-            },
-          ),
+    return Column(
+      children: [
+        // Weekday headers
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: weekDays.map((day) {
+            return Expanded(
+              child: Center(
+                child: Text(
+                  day,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            interval: 5,
-            getTitlesWidget: (value, meta) {
-              return Text(
-                value.toInt().toString(),
-                style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-              );
-            },
+        const SizedBox(height: 12),
+        // Calendar grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 7,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 8,
           ),
-        ),
-        rightTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      ),
-      borderData: FlBorderData(show: false),
-      minX: 1,
-      maxX: daysInMonth.toDouble(),
-      minY: 0,
-      maxY: maxY,
-      lineBarsData: [
-        LineChartBarData(
-          spots: spots,
-          isCurved: true,
-          gradient: LinearGradient(colors: AppConstants.primaryGradient),
-          barWidth: 3,
-          isStrokeCapRound: true,
-          dotData: const FlDotData(show: false),
-          belowBarData: BarAreaData(
-            show: true,
-            gradient: LinearGradient(
-              colors: AppConstants.primaryGradient
-                  .map((color) => color.withOpacity(0.2))
-                  .toList(),
-            ),
-          ),
+          itemCount: daysInMonth + startingWeekday,
+          itemBuilder: (context, index) {
+            if (index < startingWeekday) {
+              return const SizedBox.shrink();
+            }
+
+            final day = index - startingWeekday + 1;
+            final amount = dailyTotals[day] ?? 0.0;
+            final hasExpense = amount > 0;
+            final isToday =
+                day == DateTime.now().day &&
+                _selectedMonth == DateTime.now().month &&
+                _selectedYear == DateTime.now().year;
+
+            return Container(
+              decoration: BoxDecoration(
+                color: isToday
+                    ? AppConstants.primaryColor.withOpacity(0.1)
+                    : hasExpense
+                    ? AppConstants.primaryColor.withOpacity(0.05)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isToday
+                      ? AppConstants.primaryColor
+                      : hasExpense
+                      ? AppConstants.primaryColor.withOpacity(0.3)
+                      : Colors.grey[200]!,
+                  width: isToday ? 2 : 1,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    day.toString(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                      color: isToday
+                          ? AppConstants.primaryColor
+                          : hasExpense
+                          ? const Color(0xFF2D3748)
+                          : Colors.grey[600],
+                    ),
+                  ),
+                  if (hasExpense) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '₹${amount.toStringAsFixed(0)}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppConstants.primaryColor,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
         ),
       ],
     );

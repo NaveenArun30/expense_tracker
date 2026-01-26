@@ -6,7 +6,7 @@ class ExpenseModel {
   final String? description;
   final DateTime date;
   final String userId;
-    final String accountId; // ADD THIS
+    final String? accountId; // ADD THIS
 
 
   ExpenseModel({
@@ -17,7 +17,7 @@ class ExpenseModel {
     this.description,
     required this.date,
     required this.userId,
-        required this.accountId, // ADD THIS
+         this.accountId, // ADD THIS
 
   });
 

@@ -1,4 +1,5 @@
 import '../../../model/expense_model.dart';
+import '../../../model/income_model.dart';
 
 abstract class ExpenseState {}
 
@@ -8,12 +9,14 @@ class ExpenseLoading extends ExpenseState {}
 
 class ExpenseLoaded extends ExpenseState {
   final List<ExpenseModel> expenses;
+  final List<AccountModel> accounts;
   final double totalAmount;
   final Map<String, double> categoryTotals;
   final DateTime currentMonth;
 
   ExpenseLoaded({
     required this.expenses,
+    required this.accounts,
     required this.totalAmount,
     required this.categoryTotals,
     required this.currentMonth,
@@ -22,13 +25,15 @@ class ExpenseLoaded extends ExpenseState {
 
 class YearlyExpenseLoaded extends ExpenseState {
   final List<ExpenseModel> expenses;
-  final Map<int, double> monthlyTotals; // month -> total amount
+  final List<AccountModel> accounts;
+  final Map<int, double> monthlyTotals;
   final Map<String, double> categoryTotals;
   final int year;
   final double totalAmount;
 
   YearlyExpenseLoaded({
     required this.expenses,
+    required this.accounts,
     required this.monthlyTotals,
     required this.categoryTotals,
     required this.year,
@@ -56,4 +61,3 @@ class ExpenseError extends ExpenseState {
   final String message;
   ExpenseError(this.message);
 }
-

@@ -31,45 +31,62 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
   DateTime? _customEndDate;
 
   @override
+  void initState() {
+    super.initState();
+    // Load expenses when screen is first opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ExpenseBloc>().add(LoadExpenses());
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ExpenseBloc()..add(LoadExpenses()),
-      child: Scaffold(
-        backgroundColor: AppConstants.backgroundColor,
-        appBar: AppBar(
-          title: const Text(
-            'Expense Log',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppConstants.textOnPrimary,
+    return Scaffold(
+      backgroundColor: AppConstants.backgroundColor,
+      appBar: AppBar(
+        title: const Text(
+          'Expense Log',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppConstants.textOnPrimary,
+          ),
+        ),
+        backgroundColor: AppConstants.primaryColor,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppConstants.textOnPrimary),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: AppConstants.primaryGradient,
             ),
           ),
-          backgroundColor: AppConstants.primaryColor,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: AppConstants.textOnPrimary),
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: AppConstants.primaryGradient,
+        ),
+      ),
+      body: BlocConsumer<ExpenseBloc, ExpenseState>(
+        listener: (context, state) {
+          if (state is ExpenseError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
               ),
-            ),
-          ),
-        ),
-        body: BlocBuilder<ExpenseBloc, ExpenseState>(
-          builder: (context, state) {
-            return Column(
-              children: [
-                _buildFilterSection(context),
-                if (_selectedFilter == 'Custom Range')
-                  _buildCustomDateRangeInfo(),
-                _buildSummaryCard(state),
-                Expanded(child: _buildExpensesList(state)),
-              ],
             );
-          },
-        ),
+          }
+        },
+        builder: (context, state) {
+          return Column(
+            children: [
+              _buildFilterSection(context),
+              if (_selectedFilter == 'Custom Range')
+                _buildCustomDateRangeInfo(),
+              _buildSummaryCard(state),
+              Expanded(child: _buildExpensesList(state)),
+            ],
+          );
+        },
       ),
     );
   }
@@ -325,7 +342,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       }
 
       final sortedDates = groupedExpenses.keys.toList()
-        ..sort((a, b) => b.compareTo(a)); // Sort descending
+        ..sort((a, b) => b.compareTo(a));
 
       return ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -394,6 +411,47 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
             ],
           );
         },
+      );
+    }
+
+    if (state is ExpenseError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading expenses',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                state.message,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.read<ExpenseBloc>().add(LoadExpenses());
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.primaryColor,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -508,12 +566,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
 
     switch (filter) {
       case 'All':
-        // Load all expenses without date filtering
         context.read<ExpenseBloc>().add(LoadExpenses());
         break;
 
       case 'This Week':
-        // Calculate start of week (Monday)
         final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         final startDate = DateTime(
           startOfWeek.year,
@@ -528,7 +584,6 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         break;
 
       case 'This Month':
-        // Current month from 1st to today
         final startDate = DateTime(now.year, now.month, 1);
         final endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
 
@@ -538,7 +593,6 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         break;
 
       case 'Last Month':
-        // Previous month
         final lastMonth = DateTime(now.year, now.month - 1, 1);
         final startDate = lastMonth;
         final endDate = DateTime(now.year, now.month, 0, 23, 59, 59);
@@ -569,7 +623,6 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         _customEndDate = picked.end;
       });
 
-      // Load expenses for the selected date range
       context.read<ExpenseBloc>().add(
         LoadExpensesByDateRange(
           startDate: DateTime(
@@ -588,7 +641,6 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         ),
       );
     } else {
-      // If user cancels, revert to 'All'
       setState(() {
         _selectedFilter = 'All';
       });
@@ -602,39 +654,6 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ExpenseDetailBottomSheet(expense: expense),
-    );
-  }
-
-  void _showDeleteDialog(BuildContext context, ExpenseModel expense) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Delete Expense',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        content: Text('Are you sure you want to delete "${expense.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[600])),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () {
-              context.read<ExpenseBloc>().add(DeleteExpense(expense.id!));
-              Navigator.pop(context);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
     );
   }
 }

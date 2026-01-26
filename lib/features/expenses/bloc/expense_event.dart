@@ -22,7 +22,9 @@ class LoadYearlyExpenses extends ExpenseEvent {
 
 class AddExpense extends ExpenseEvent {
   final ExpenseModel expense;
-  AddExpense(this.expense);
+  final String? accountId; // Made optional
+  
+  AddExpense(this.expense, {this.accountId});
 }
 
 class DeleteExpense extends ExpenseEvent {

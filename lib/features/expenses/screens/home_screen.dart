@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
-    context.read<ExpenseBloc>().add(LoadExpenses());
+    // context.read<ExpenseBloc>().add(LoadExpenses());
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),

@@ -7,6 +7,7 @@ import '../../../constants/app_constants.dart';
 import '../../../model/expense_model.dart';
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
+import '../bloc/expense_state.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -23,6 +24,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
   final _descriptionController = TextEditingController();
 
   String _selectedCategory = AppConstants.categories.first;
+  String? _selectedAccountId; // Made nullable - no account selected by default
   DateTime _selectedDate = DateTime.now();
 
   late AnimationController _animationController;
@@ -32,6 +34,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
   @override
   void initState() {
     super.initState();
+    // Load expenses to get accounts
+    context.read<ExpenseBloc>().add(LoadExpenses());
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -100,6 +105,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
               children: [
                 _buildAmountSection(),
                 const SizedBox(height: 32),
+                _buildAccountSelector(),
+                const SizedBox(height: 24),
                 _buildTitleSection(),
                 const SizedBox(height: 24),
                 _buildCategorySection(),
@@ -119,7 +126,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
 
   Widget _buildAmountSection() {
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -138,7 +145,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Amount',
             style: TextStyle(
               color: AppConstants.cardColor,
@@ -186,6 +193,223 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAccountSelector() {
+    return BlocBuilder<ExpenseBloc, ExpenseState>(
+      builder: (context, state) {
+        if (state is ExpenseLoaded && state.accounts.isNotEmpty) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    'Deduct from Account',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppConstants.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(Optional)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[500],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String?>(
+                    value: _selectedAccountId,
+                    isExpanded: true,
+                    hint: Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet_outlined,
+                          color: Colors.grey[400],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'No account (expense only)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    icon: const Icon(Icons.arrow_drop_down),
+                    items: [
+                      // Add "None" option
+                      DropdownMenuItem<String?>(
+                        value: null,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.block,
+                              color: Colors.grey[400],
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'No account (expense only)',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Add all accounts
+                      ...state.accounts.map((account) {
+                        return DropdownMenuItem<String?>(
+                          value: account.id,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.account_balance_wallet,
+                                color: AppConstants.successColor,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  account.accountName,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '\$${account.balance.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedAccountId = value;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              if (_selectedAccountId != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppConstants.successColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppConstants.successColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: AppConstants.successColor,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'This amount will be deducted from the selected account balance',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.blue[700],
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Expense will be recorded without affecting any account balance',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          );
+        }
+
+        // When no accounts exist
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.blue[200]!),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue[700]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'No accounts available. Expense will be recorded without affecting account balance.',
+                  style: TextStyle(color: Colors.blue[900], fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -240,13 +464,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
           ),
         ),
         const SizedBox(height: 12),
-        Container(
+        SizedBox(
           height: 120,
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.6, // Reduced from 0.8 to give more width
+              childAspectRatio: 0.6,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
@@ -267,7 +491,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(8), // Reduced padding
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? categoryColor.withOpacity(0.1)
@@ -289,26 +513,24 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min, // Added this
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Flexible(
-                        // Wrap icon with Flexible
                         child: Icon(
                           categoryIcon,
                           color: isSelected ? categoryColor : Colors.grey[400],
-                          size: 20, // Reduced icon size
+                          size: 20,
                         ),
                       ),
-                      const SizedBox(height: 4), // Reduced spacing
+                      const SizedBox(height: 4),
                       Flexible(
-                        // Wrap text with Flexible
                         child: Text(
                           category,
                           style: TextStyle(
                             color: isSelected
                                 ? categoryColor
                                 : Colors.grey[600],
-                            fontSize: 9, // Reduced font size
+                            fontSize: 9,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -484,16 +706,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
             ? null
             : _descriptionController.text.trim(),
         date: _selectedDate,
-        userId: currentUserId, // Now using actual Supabase user ID
-        accountId: ""
+        userId: currentUserId,
+        accountId: _selectedAccountId ?? null, // Use empty string if null
       );
 
-      context.read<ExpenseBloc>().add(AddExpense(expense));
+      // Pass the accountId to the event (can be null)
+      context.read<ExpenseBloc>().add(
+        AddExpense(expense, accountId: _selectedAccountId),
+      );
 
-      // Show success message
+      // Show success message with information about account deduction
+      final message = _selectedAccountId != null
+          ? 'Expense added and deducted from account!'
+          : 'Expense added successfully!';
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Expense added successfully!'),
+          content: Text(message),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

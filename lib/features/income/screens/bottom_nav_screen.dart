@@ -4,10 +4,11 @@ import 'package:expense_tracker_app/features/expenses/screens/home_screen.dart';
 import 'package:expense_tracker_app/features/income/screens/income_management.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../expenses/bloc/expense_bloc.dart';
+import '../../expenses/bloc/expense_event.dart';
 import '../../settings/settings_screen.dart';
-
-
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -29,6 +30,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<ExpenseBloc>().add(LoadExpenses());
+
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -93,10 +96,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             title: "Profile",
             tabColor: const Color(0xFF667eea),
             tabGradient: const LinearGradient(
-              colors: [
-                Color(0xFF667eea),
-                Color(0xFF764ba2),
-              ],
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
