@@ -7,7 +7,8 @@ import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final supabase.SupabaseClient _supabaseClient = supabase.Supabase.instance.client;
+  final supabase.SupabaseClient _supabaseClient =
+      supabase.Supabase.instance.client;
   StreamSubscription<supabase.AuthState>? _authStateSubscription;
 
   AuthBloc() : super(AuthInitial()) {
@@ -105,6 +106,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     // ... other handlers ...
+    on<PasswordResetRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        await _supabaseClient.auth.resetPasswordForEmail(
+          event.email,
+          redirectTo: event.redirectTo,
+        );
+        emit(
+          AuthPasswordResetSent(
+            'Password reset email sent. Please check your inbox.',
+          ),
+        );
+      } on AuthException catch (e) {
+        emit(AuthError(e.message));
+      } catch (_) {
+        emit(AuthError('Failed to send reset email. Try again.'));
+      }
+    });
 
     // Internal events
     on<_AuthInternalAuthenticated>((event, emit) {
@@ -127,11 +146,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     // Set up auth state listener
-    _authStateSubscription = _supabaseClient.auth.onAuthStateChange.listen((data) {
+    _authStateSubscription = _supabaseClient.auth.onAuthStateChange.listen((
+      data,
+    ) {
       final session = data.session;
       final event = data.event;
 
-      print('Auth state changed: ${event.toString()}, Session: ${session?.user.email}');
+      print(
+        'Auth state changed: ${event.toString()}, Session: ${session?.user.email}',
+      );
 
       if (session != null) {
         add(_AuthInternalAuthenticated(session.user));
@@ -171,7 +194,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await _supabaseClient.from('users').insert({
           'user_id': user.id,
           'email': user.email,
-          'name': user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
+          'name':
+              user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? 'User',
           'created_at': DateTime.now().toIso8601String(),
         });
       }
@@ -186,7 +210,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     switch (e.message) {
       case 'Invalid login credentials':
-        errorMessage = 'Invalid email or password. Please check your credentials.';
+        errorMessage =
+            'Invalid email or password. Please check your credentials.';
         break;
       case 'Email not confirmed':
         errorMessage = 'Please verify your email address before logging in.';
@@ -195,7 +220,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         errorMessage = 'Too many login attempts. Please try again later.';
         break;
       case 'User already registered':
-        errorMessage = 'An account with this email already exists. Please sign in instead.';
+        errorMessage =
+            'An account with this email already exists. Please sign in instead.';
         break;
       case 'Password should be at least 6 characters':
         errorMessage = 'Password must be at least 6 characters long.';
