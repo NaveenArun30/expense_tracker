@@ -8,6 +8,8 @@ import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
 import '../auth/bloc/auth_state.dart';
 import '../auth/screens/login_screen.dart';
+import '../../services/preferences_service.dart';
+import 'security_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -70,7 +72,25 @@ class SettingsScreen extends StatelessWidget {
                           themeState.isDark,
                           (_) => context.read<ThemeBloc>().add(ToggleTheme()),
                         ),
+                        _buildListTile(
+                          'Security',
+                          'Biometrics & PIN',
+                          Icons.security,
+                          Colors.blue,
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SecuritySettingsScreen(),
+                            ),
+                          ),
+                        ),
                       ]),
+                      const SizedBox(height: 24),
+
+                      // AI Configuration
+                      _buildSectionHeader('AI Configuration'),
+                      const SizedBox(height: 12),
+                      _buildSettingsCard([_buildApiKeyTile(context)]),
                       const SizedBox(height: 24),
 
                       // Account Section
@@ -327,6 +347,89 @@ class SettingsScreen extends StatelessWidget {
         color: Colors.grey,
       ),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildApiKeyTile(BuildContext context) {
+    return ListTile(
+      contentPadding: const EdgeInsets.all(16),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.purple.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(Icons.key, color: Colors.purple, size: 20),
+      ),
+      title: const Text(
+        'Omni AI Key',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF2D3748),
+        ),
+      ),
+      subtitle: const Text(
+        'Configure Gemini API Key',
+        style: TextStyle(fontSize: 12, color: Colors.grey),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: Colors.grey,
+      ),
+      onTap: () => _showApiKeyDialog(context),
+    );
+  }
+
+  void _showApiKeyDialog(BuildContext context) {
+    final TextEditingController controller = TextEditingController();
+    final prefs = context.read<PreferencesService>();
+
+    // Load existing key
+    prefs.getGeminiApiKey().then((key) {
+      if (key != null) controller.text = key;
+    });
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Enter Gemini API Key'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Get your API key from Google AI Studio to enable AI insights.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'API Key',
+                hintText: 'AIzaSy...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              prefs.saveGeminiApiKey(controller.text.trim());
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('API Key saved successfully')),
+              );
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 

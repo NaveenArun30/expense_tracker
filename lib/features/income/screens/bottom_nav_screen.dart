@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../expenses/bloc/expense_bloc.dart';
 import '../../expenses/bloc/expense_event.dart';
 import '../../settings/settings_screen.dart';
+import '../../shared/screens/shared_dashboard_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -24,6 +25,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const IncomeScreen(),
+    const SharedDashboardScreen(),
     const SettingsScreen(),
   ];
 
