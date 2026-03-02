@@ -19,7 +19,10 @@ class AiService {
     // We'll assume the lists passed are already relevant.
 
     try {
-      final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+      final model = GenerativeModel(
+        model: 'gemini-flash-latest',
+        apiKey: apiKey,
+      );
 
       final totalExpense = expenses.fold(0.0, (sum, e) => sum + e.amount);
       final totalIncome = income.fold(0.0, (sum, e) => sum + e.amount);
@@ -62,7 +65,10 @@ Format the response in Markdown.
     }
 
     try {
-      final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+      final model = GenerativeModel(
+        model: 'gemini-flash-latest',
+        apiKey: apiKey,
+      );
 
       final chat = model.startChat(history: history);
 
