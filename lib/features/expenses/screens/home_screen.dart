@@ -13,6 +13,7 @@ import '../bloc/expense_state.dart';
 import 'add_expense_screen.dart';
 import 'analytics_screen.dart';
 import 'expense_log_screen.dart';
+import '../../../widgets/date_picker_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen>
   late AnimationController _floatingController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  String _dateFilterLabel = DateFormat.MMM().format(DateTime.now());
 
   @override
   bool get wantKeepAlive => true;
@@ -203,24 +206,55 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       actions: [
-        IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
+        GestureDetector(
+          onTap: () => _showFilterOptions(context),
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.bar_chart_rounded,
-              color: AppConstants.surfaceColor,
-              size: 20,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _dateFilterLabel,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.expand_more_rounded,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ],
             ),
-          ),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AnalyticsScreen()),
           ),
         ),
+        // const SizedBox(width: 8),
+        // IconButton(
+        //   icon: Container(
+        //     padding: const EdgeInsets.all(8),
+        //     decoration: BoxDecoration(
+        //       color: Colors.white.withOpacity(0.2),
+        //       borderRadius: BorderRadius.circular(10),
+        //     ),
+        //     child: const Icon(
+        //       Icons.bar_chart_rounded,
+        //       color: AppConstants.surfaceColor,
+        //       size: 20,
+        //     ),
+        //   ),
+        //   onPressed: () => Navigator.push(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => const AnalyticsScreen()),
+        //   ),
+        // ),
         IconButton(
           icon: Container(
             padding: const EdgeInsets.all(8),
@@ -659,7 +693,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: () => _showMonthPicker(context, state.currentMonth),
+                  onTap: () => _showFilterOptions(context),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -675,7 +709,7 @@ class _HomeScreenState extends State<HomeScreen>
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          DateFormat.MMM().format(state.currentMonth),
+                          _dateFilterLabel,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -684,7 +718,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         const SizedBox(width: 4),
                         const Icon(
-                          Icons.expand_more_rounded,
+                          Icons.date_range_rounded,
                           color: Colors.white,
                           size: 16,
                         ),
@@ -865,12 +899,141 @@ class _HomeScreenState extends State<HomeScreen>
         child: MonthYearPicker(
           currentDate: currentMonth,
           onMonthYearSelected: (selectedDate) {
+            setState(() {
+              _dateFilterLabel = DateFormat.MMM().format(selectedDate);
+            });
             context.read<ExpenseBloc>().add(LoadExpenses(month: selectedDate));
             Navigator.pop(modalContext);
           },
         ),
       ),
     );
+  }
+
+  void _showFilterOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 16),
+              child: Text(
+                'Filter Transactions',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.calendar_month,
+                color: Color(0xFF667eea),
+              ),
+              title: const Text('By Month'),
+              onTap: () {
+                Navigator.pop(modalContext);
+                final state = context.read<ExpenseBloc>().state;
+                DateTime initial = DateTime.now();
+                if (state is ExpenseLoaded) initial = state.currentMonth;
+                _showMonthPicker(context, initial);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.calendar_today,
+                color: Color(0xFF667eea),
+              ),
+              title: const Text('By Year'),
+              onTap: () {
+                Navigator.pop(modalContext);
+                _showYearPicker(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.date_range, color: Color(0xFF667eea)),
+              title: const Text('Custom Range'),
+              onTap: () {
+                Navigator.pop(modalContext);
+                _showCustomDateRangePicker(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showYearPicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text("Select Year"),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: YearPicker(
+              firstDate: DateTime(DateTime.now().year - 10, 1),
+              lastDate: DateTime(DateTime.now().year + 10, 1),
+              initialDate: DateTime.now(),
+              selectedDate: DateTime.now(),
+              onChanged: (DateTime dateTime) {
+                Navigator.pop(dialogContext);
+                final start = DateTime(dateTime.year, 1, 1);
+                final end = DateTime(dateTime.year, 12, 31, 23, 59, 59);
+                setState(() {
+                  _dateFilterLabel = DateFormat.y().format(dateTime);
+                });
+                context.read<ExpenseBloc>().add(
+                  LoadExpensesByDateRange(startDate: start, endDate: end),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showCustomDateRangePicker(BuildContext context) async {
+    final DateTimeRange? picked = await showDialog<DateTimeRange>(
+      context: context,
+      builder: (context) => const DateRangePickerWidget(),
+    );
+
+    if (picked != null && mounted) {
+      final start = DateTime(
+        picked.start.year,
+        picked.start.month,
+        picked.start.day,
+      );
+      final end = DateTime(
+        picked.end.year,
+        picked.end.month,
+        picked.end.day,
+        23,
+        59,
+        59,
+      );
+      setState(() {
+        _dateFilterLabel =
+            "${DateFormat('MMM d').format(start)} - ${DateFormat('MMM d').format(end)}";
+      });
+      context.read<ExpenseBloc>().add(
+        LoadExpensesByDateRange(startDate: start, endDate: end),
+      );
+    }
   }
 
   Widget _buildFAB(BuildContext context) {
