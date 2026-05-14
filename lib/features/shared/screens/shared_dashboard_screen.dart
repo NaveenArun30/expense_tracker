@@ -48,12 +48,14 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Create New Group',
-              style: TextStyle(
-                color: AppConstants.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            const Expanded(
+              child: Text(
+                'Create New Group',
+                style: TextStyle(
+                  color: AppConstants.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -159,12 +161,14 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
-              'Join Group',
-              style: TextStyle(
-                color: AppConstants.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            const Expanded(
+              child: Text(
+                'Join Group',
+                style: TextStyle(
+                  color: AppConstants.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -423,7 +427,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
           if (state is GroupsLoaded) {
             if (state.groups.isEmpty) {
               return Center(
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(32.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -659,7 +663,9 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                                     ),
                                     child: Center(
                                       child: Text(
-                                        group.name[0].toUpperCase(),
+                                        group.name.isNotEmpty
+                                            ? group.name[0].toUpperCase()
+                                            : 'G',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 24,
@@ -676,6 +682,8 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                                       children: [
                                         Text(
                                           group.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             color: AppConstants.textPrimary,
                                             fontSize: 18,
@@ -748,13 +756,13 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
               ],
               borderRadius: BorderRadius.circular(16),
             ),
-            child: FloatingActionButton(
+            child: FloatingActionButton.small(
               heroTag: 'join',
               onPressed: _showJoinGroupDialog,
               backgroundColor: AppConstants.surfaceColor,
               foregroundColor: AppConstants.secondaryColor,
               elevation: 0,
-              child: const Icon(Icons.link, size: 26),
+              child: const Icon(Icons.link, size: 20),
             ),
           ),
           const SizedBox(height: 16),
@@ -772,7 +780,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                 ),
               ],
             ),
-            child: FloatingActionButton.small(
+            child: FloatingActionButton(
               heroTag: 'create',
               onPressed: _showCreateGroupDialog,
               backgroundColor: Colors.transparent,

@@ -96,6 +96,17 @@ class SharedRepository {
         .toList();
   }
 
+  Stream<List<SharedExpenseModel>> watchGroupExpenses(String groupId) {
+    return _supabase
+        .from('shared_expenses')
+        .stream(primaryKey: ['id'])
+        .eq('group_id', groupId)
+        .order('date', ascending: false)
+        .map(
+          (list) => list.map((e) => SharedExpenseModel.fromJson(e)).toList(),
+        );
+  }
+
   Future<void> addSharedExpense({
     required String groupId,
     required String description,
