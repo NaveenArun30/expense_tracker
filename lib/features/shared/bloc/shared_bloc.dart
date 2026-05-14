@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../repositories/shared_repository.dart';
 import '../models/shared_expense_model.dart';
@@ -6,6 +7,7 @@ import 'shared_state.dart';
 
 class SharedBloc extends Bloc<SharedEvent, SharedState> {
   final SharedRepository _repository;
+  StreamSubscription<List<SharedExpenseModel>>? _expensesSubscription;
 
   SharedBloc({required SharedRepository repository})
     : _repository = repository,
@@ -17,6 +19,13 @@ class SharedBloc extends Bloc<SharedEvent, SharedState> {
     on<AddSharedExpense>(_onAddSharedExpense);
     on<LoadExpenseSplits>(_onLoadExpenseSplits);
     on<UpdateSplitStatus>(_onUpdateSplitStatus);
+    on<UpdateGroupExpenses>(_onUpdateGroupExpenses);
+  }
+
+  @override
+  Future<void> close() {
+    _expensesSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadGroups(
@@ -84,8 +93,32 @@ class SharedBloc extends Bloc<SharedEvent, SharedState> {
       emit(
         GroupDetailsLoaded(group: group, members: members, expenses: expenses),
       );
+
+      // Setup real-time listener
+      _expensesSubscription?.cancel();
+      _expensesSubscription = _repository.watchGroupExpenses(event.groupId).listen(
+        (updatedExpenses) {
+          add(UpdateGroupExpenses(updatedExpenses));
+        },
+      );
     } catch (e) {
       emit(SharedError(e.toString()));
+    }
+  }
+
+  void _onUpdateGroupExpenses(
+    UpdateGroupExpenses event,
+    Emitter<SharedState> emit,
+  ) {
+    if (state is GroupDetailsLoaded) {
+      final currentState = state as GroupDetailsLoaded;
+      emit(
+        GroupDetailsLoaded(
+          group: currentState.group,
+          members: currentState.members,
+          expenses: event.expenses,
+        ),
+      );
     }
   }
 
@@ -93,6 +126,7 @@ class SharedBloc extends Bloc<SharedEvent, SharedState> {
     AddSharedExpense event,
     Emitter<SharedState> emit,
   ) async {
+    emit(SharedLoading());
     try {
       await _repository.addSharedExpense(
         groupId: event.groupId,
@@ -108,6 +142,7 @@ class SharedBloc extends Bloc<SharedEvent, SharedState> {
       final members = await _repository.getGroupMembers(event.groupId);
       final expenses = await _repository.getGroupExpenses(event.groupId);
 
+      emit(const SharedOperationSuccess('Expense added successfully'));
       emit(
         GroupDetailsLoaded(group: group, members: members, expenses: expenses),
       );

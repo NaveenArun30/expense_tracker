@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../models/shared_expense_model.dart';
+
 abstract class SharedEvent extends Equatable {
   const SharedEvent();
 
@@ -77,4 +79,13 @@ class UpdateSplitStatus extends SharedEvent {
 
   @override
   List<Object> get props => [splitId, expenseId, status];
+}
+
+class UpdateGroupExpenses extends SharedEvent {
+  final List<SharedExpenseModel> expenses;
+
+  const UpdateGroupExpenses(this.expenses);
+
+  @override
+  List<Object> get props => [expenses];
 }

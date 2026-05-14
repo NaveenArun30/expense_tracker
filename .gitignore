@@ -34,3 +34,9 @@ linux/build/
 # Windows
 windows/flutter/ephemeral/
 windows/build/
+# Generated plugin registrant files
+**/generated_plugin_registrant.dart
+**/generated_plugin_registrant.cc
+**/generated_plugin_registrant.h
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.swift

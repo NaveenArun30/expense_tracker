@@ -9,6 +9,7 @@ import '../../../widgets/expense_detail_bottom_sheet.dart';
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
+import '../../../utils/pdf_export_helper.dart';
 
 class ExpenseLogScreen extends StatefulWidget {
   const ExpenseLogScreen({super.key});
@@ -79,7 +80,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         builder: (context, state) {
           return Column(
             children: [
-              _buildFilterSection(context),
+              _buildFilterSection(context, state),
               if (_selectedFilter == 'Custom Range')
                 _buildCustomDateRangeInfo(),
               _buildSummaryCard(state),
@@ -91,7 +92,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
     );
   }
 
-  Widget _buildFilterSection(BuildContext context) {
+  Widget _buildFilterSection(BuildContext context, ExpenseState state) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -107,13 +108,26 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Filter Transactions',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2D3748),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Filter Transactions',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2D3748),
+                ),
+              ),
+              if (state is ExpenseLoaded && state.expenses.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.download, color: AppConstants.primaryColor),
+                  tooltip: 'Download Statement',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () => _showDownloadConfirmationDialog(context, state),
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
@@ -655,5 +669,67 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => ExpenseDetailBottomSheet(expense: expense),
     );
+  }
+
+  String _getFilterDateRangeString() {
+    if (_selectedFilter == 'Custom Range' &&
+        _customStartDate != null &&
+        _customEndDate != null) {
+      return '${DateFormat('MMM dd, yyyy').format(_customStartDate!)} - ${DateFormat('MMM dd, yyyy').format(_customEndDate!)}';
+    }
+    return _selectedFilter;
+  }
+
+  Future<void> _showDownloadConfirmationDialog(BuildContext context, ExpenseLoaded state) async {
+    final shouldDownload = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Download Statement'),
+        content: const Text('Would you like to download the expense statement as a PDF? It will be saved directly to your device.'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppConstants.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Download'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDownload == true && context.mounted) {
+      try {
+        final dateRangeStr = _getFilterDateRangeString();
+        final filePath = await PdfExportHelper.generateExpenseReport(
+            state.expenses, dateRangeStr);
+        
+        if (context.mounted && filePath != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Saved successfully to: $filePath'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save PDF: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 }
