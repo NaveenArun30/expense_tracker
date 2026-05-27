@@ -5,6 +5,7 @@
 // import '../bloc/report_bloc.dart';
 // import '../bloc/report_event.dart';
 // import '../bloc/report_state.dart';
+// import '../../../core/currency_bloc/currency_cubit.dart';
 
 // class ReportScreen extends StatelessWidget {
 //   const ReportScreen({super.key});
@@ -58,11 +59,11 @@
 //                             crossAxisAlignment: CrossAxisAlignment.start,
 //                             children: [
 //                               Text(
-//                                 "Total Income: ₹${state.totalIncome}",
+//                                 "Total Income: \${context.currencySymbol}${state.totalIncome}",
 //                                 style: const TextStyle(fontSize: 18),
 //                               ),
 //                               Text(
-//                                 "Total Expense: ₹${state.totalExpense}",
+//                                 "Total Expense: \${context.currencySymbol}${state.totalExpense}",
 //                                 style: const TextStyle(fontSize: 18),
 //                               ),
 //                               const SizedBox(height: 16),
@@ -80,7 +81,7 @@
 //                                         (e) => ListTile(
 //                                           title: Text(e.key),
 //                                           trailing: Text(
-//                                             "₹${e.value.toStringAsFixed(2)}",
+//                                             "\${context.currencySymbol}${e.value.toStringAsFixed(2)}",
 //                                           ),
 //                                         ),
 //                                       )

@@ -7,6 +7,7 @@ import '../bloc/shared_bloc.dart';
 import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
 import '../models/shared_expense_model.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class SharedExpenseDetailScreen extends StatefulWidget {
   final String expenseId;
@@ -51,7 +52,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
         content: Text(
           currentlyPaid
               ? 'Are you sure you want to mark this payment as pending?'
-              : 'Confirm that this person has paid their share of \$${split.amount.toStringAsFixed(2)}?',
+              : 'Confirm that this person has paid their share of ${context.currencySymbol}${split.amount.toStringAsFixed(2)}?',
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
@@ -356,7 +357,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${expense.amount.toStringAsFixed(2)}',
+                      '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -494,7 +495,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '\$${totalPaid.toStringAsFixed(2)}',
+                    '${context.currencySymbol}${totalPaid.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppConstants.successColor,
                       fontSize: 22,
@@ -559,7 +560,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '\$${totalPending.toStringAsFixed(2)}',
+                    '${context.currencySymbol}${totalPending.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppConstants.warningColor,
                       fontSize: 22,
@@ -675,7 +676,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
-            '\$${split.amount.toStringAsFixed(2)}',
+            '${context.currencySymbol}${split.amount.toStringAsFixed(2)}',
             style: TextStyle(
               color: AppConstants.textSecondary,
               fontSize: 14,

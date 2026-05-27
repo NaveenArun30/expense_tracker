@@ -7,6 +7,7 @@ import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
 import 'add_shared_expense_screen.dart';
 import 'shared_expense_detail_screen.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final String groupId;
@@ -176,7 +177,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                   ),
                                 ),
                                 trailing: Text(
-                                  '\$${expense.amount.toStringAsFixed(2)}',
+                                  '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -267,7 +268,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
               Expanded(
                 child: _buildSummaryCard(
                   'Total Spending',
-                  '\$${state.expenses.fold<double>(0, (sum, e) => sum + e.amount).toStringAsFixed(2)}',
+                  '${context.currencySymbol}${state.expenses.fold<double>(0, (sum, e) => sum + e.amount).toStringAsFixed(2)}',
                   Colors.blue,
                 ),
               ),

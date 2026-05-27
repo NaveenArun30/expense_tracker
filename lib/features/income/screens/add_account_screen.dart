@@ -5,6 +5,7 @@ import '../../../constants/app_constants.dart';
 import '../../../model/income_model.dart';
 import '../bloc/income_bloc.dart';
 import '../bloc/income_event.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class AddAccountScreen extends StatefulWidget {
   const AddAccountScreen({super.key});
@@ -143,9 +144,9 @@ class _AddAccountScreenState extends State<AddAccountScreen>
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
-            decoration: const InputDecoration(
-              prefixText: '\$',
-              prefixStyle: TextStyle(
+            decoration: InputDecoration(
+              prefixText: context.currencySymbol,
+              prefixStyle: const TextStyle(
                 color: Colors.white,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,

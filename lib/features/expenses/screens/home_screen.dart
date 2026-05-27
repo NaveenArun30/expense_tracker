@@ -14,6 +14,7 @@ import 'add_expense_screen.dart';
 import 'analytics_screen.dart';
 import 'expense_log_screen.dart';
 import '../../../widgets/date_picker_widget.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -363,9 +364,9 @@ class _HomeScreenState extends State<HomeScreen>
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '\$',
-                      style: TextStyle(
+                    Text(
+                      context.currencySymbol,
+                      style: const TextStyle(
                         color: AppConstants.textOnPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.w600,
@@ -432,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildStatCard(
                 'Top Category',
                 topCategories.first.key,
-                '\$${topCategories.first.value.toStringAsFixed(0)}',
+                '${context.currencySymbol}${topCategories.first.value.toStringAsFixed(0)}',
                 AppConstants.categoryColors[topCategories.first.key] ??
                     Colors.grey,
                 AppConstants.categoryIcons[topCategories.first.key] ??
@@ -444,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: _buildStatCard(
                 'Daily Avg',
                 'Per day spent',
-                '\$${(state.totalAmount / DateTime.now().day).toStringAsFixed(0)}',
+                '${context.currencySymbol}${(state.totalAmount / DateTime.now().day).toStringAsFixed(0)}',
                 AppConstants.successColor,
                 Icons.trending_up_rounded,
               ),
@@ -738,7 +739,7 @@ class _HomeScreenState extends State<HomeScreen>
                 Expanded(
                   child: _buildOverviewItem(
                     'Total Spent',
-                    '\$${state.totalAmount.toStringAsFixed(2)}',
+                    '${context.currencySymbol}${state.totalAmount.toStringAsFixed(2)}',
                     Icons.account_balance_wallet_rounded,
                     const Color(0xFF667eea),
                   ),
@@ -828,7 +829,7 @@ class _HomeScreenState extends State<HomeScreen>
               SizedBox(
                 width: 60,
                 child: Text(
-                  '\$${entry.value.toStringAsFixed(0)}',
+                  '${context.currencySymbol}${entry.value.toStringAsFixed(0)}',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,

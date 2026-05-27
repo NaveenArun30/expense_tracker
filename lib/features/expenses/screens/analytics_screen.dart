@@ -16,6 +16,7 @@ import '../../income/bloc/income_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../income/bloc/income_state.dart';
 import '../../../model/income_model.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -655,7 +656,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   if (hasExpense) ...[
                     const SizedBox(height: 4),
                     Text(
-                      '₹${amount.toStringAsFixed(0)}',
+                      '${context.currencySymbol}${amount.toStringAsFixed(0)}',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,

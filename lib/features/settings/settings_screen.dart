@@ -10,6 +10,9 @@ import '../auth/bloc/auth_state.dart';
 import '../auth/screens/login_screen.dart';
 import '../../services/preferences_service.dart';
 import 'security_settings_screen.dart';
+import '../../core/currency_bloc/currency_cubit.dart';
+import '../../core/currency_bloc/currency_state.dart';
+import '../../model/currency_model.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -64,27 +67,43 @@ class SettingsScreen extends StatelessWidget {
                       // App Settings Section
                       _buildSectionHeader('App Settings'),
                       const SizedBox(height: 12),
-                      _buildSettingsCard([
-                        _buildSwitchTile(
-                          'Dark Mode',
-                          'Switch between light and dark theme',
-                          Icons.dark_mode,
-                          themeState.isDark,
-                          (_) => context.read<ThemeBloc>().add(ToggleTheme()),
-                        ),
-                        _buildListTile(
-                          'Security',
-                          'Biometrics & PIN',
-                          Icons.security,
-                          Colors.blue,
-                          () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SecuritySettingsScreen(),
+                      BlocBuilder<CurrencyCubit, CurrencyState>(
+                        builder: (context, currencyState) {
+                          return _buildSettingsCard([
+                            _buildSwitchTile(
+                              'Dark Mode',
+                              'Switch between light and dark theme',
+                              Icons.dark_mode,
+                              themeState.isDark,
+                              (_) =>
+                                  context.read<ThemeBloc>().add(ToggleTheme()),
                             ),
-                          ),
-                        ),
-                      ]),
+                            _buildListTile(
+                              'Currency',
+                              'Selected: ${currencyState.selectedCurrency.name} (${currencyState.selectedCurrency.symbol})',
+                              Icons.currency_exchange,
+                              Colors.teal,
+                              () => _showCurrencySelectorDialog(
+                                context,
+                                currencyState.selectedCurrency,
+                              ),
+                            ),
+                            _buildListTile(
+                              'Security',
+                              'Biometrics & PIN',
+                              Icons.security,
+                              Colors.blue,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const SecuritySettingsScreen(),
+                                ),
+                              ),
+                            ),
+                          ]);
+                        },
+                      ),
                       const SizedBox(height: 24),
 
                       // AI Configuration
@@ -430,6 +449,114 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCurrencySelectorDialog(
+    BuildContext context,
+    Currency currentCurrency,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        String searchQuery = '';
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final filteredCurrencies = availableCurrencies.where((c) {
+              final query = searchQuery.toLowerCase();
+              return c.name.toLowerCase().contains(query) ||
+                  c.code.toLowerCase().contains(query) ||
+                  c.symbol.toLowerCase().contains(query);
+            }).toList();
+
+            return AlertDialog(
+              title: const Text('Select Currency'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search currency...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filteredCurrencies.length,
+                        itemBuilder: (context, index) {
+                          final currency = filteredCurrencies[index];
+                          final isSelected = currency == currentCurrency;
+
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: isSelected
+                                  ? AppConstants.primaryColor
+                                  : Colors.grey[200],
+                              child: Text(
+                                currency.symbol,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              currency.name,
+                              style: TextStyle(
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            subtitle: Text(currency.code),
+                            trailing: isSelected
+                                ? const Icon(
+                                    Icons.check_circle,
+                                    color: AppConstants.primaryColor,
+                                  )
+                                : null,
+                            onTap: () {
+                              dialogContext.read<CurrencyCubit>().setCurrency(
+                                currency,
+                              );
+                              Navigator.pop(dialogContext);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Close'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

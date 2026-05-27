@@ -8,6 +8,7 @@ import '../../../model/expense_model.dart';
 import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -161,9 +162,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
-            decoration: const InputDecoration(
-              prefixText: '\$',
-              prefixStyle: TextStyle(
+            decoration: InputDecoration(
+              prefixText: context.currencySymbol,
+              prefixStyle: const TextStyle(
                 color: AppConstants.cardColor,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -304,7 +305,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                                 ),
                               ),
                               Text(
-                                '\$${account.balance.toStringAsFixed(2)}',
+                                '${context.currencySymbol}${account.balance.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey[600],

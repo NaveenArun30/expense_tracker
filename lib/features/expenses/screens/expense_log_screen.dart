@@ -10,6 +10,7 @@ import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
 import '../../../utils/pdf_export_helper.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class ExpenseLogScreen extends StatefulWidget {
   const ExpenseLogScreen({super.key});
@@ -261,7 +262,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${state.totalAmount.toStringAsFixed(2)}',
+                    '${context.currencySymbol}${state.totalAmount.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppConstants.textOnPrimary,
                       fontSize: 28,
@@ -408,7 +409,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                       ],
                     ),
                     Text(
-                      '\$${dayTotal.toStringAsFixed(2)}',
+                      '${context.currencySymbol}${dayTotal.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -544,7 +545,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '\$${expense.amount.toStringAsFixed(2)}',
+              '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -709,7 +710,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       try {
         final dateRangeStr = _getFilterDateRangeString();
         final filePath = await PdfExportHelper.generateExpenseReport(
-            state.expenses, dateRangeStr);
+          state.expenses,
+          dateRangeStr,
+          currencySymbol: context.currencySymbol,
+        );
         
         if (context.mounted && filePath != null) {
           ScaffoldMessenger.of(context).showSnackBar(

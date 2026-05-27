@@ -6,6 +6,7 @@ import '../constants/app_constants.dart';
 import '../features/expenses/bloc/expense_bloc.dart';
 import '../features/expenses/bloc/expense_event.dart';
 import '../model/expense_model.dart';
+import '../core/currency_bloc/currency_cubit.dart';
 
 class ExpenseDetailBottomSheet extends StatelessWidget {
   final ExpenseModel expense;
@@ -85,7 +86,7 @@ class ExpenseDetailBottomSheet extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '\$${expense.amount.toStringAsFixed(2)}',
+                      '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

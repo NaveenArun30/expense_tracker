@@ -8,6 +8,7 @@ import '../bloc/income_event.dart';
 import '../bloc/income_state.dart';
 import 'add_account_screen.dart';
 import 'add_income_screen.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class IncomeScreen extends StatefulWidget {
   const IncomeScreen({super.key});
@@ -181,9 +182,9 @@ class _IncomeScreenState extends State<IncomeScreen>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '\$',
-                style: TextStyle(
+              Text(
+                context.currencySymbol,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
@@ -218,7 +219,7 @@ class _IncomeScreenState extends State<IncomeScreen>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'This month: \$${state.totalIncome.toStringAsFixed(2)}',
+                  'This month: ${context.currencySymbol}${state.totalIncome.toStringAsFixed(2)}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
@@ -371,7 +372,7 @@ class _IncomeScreenState extends State<IncomeScreen>
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${account.balance.toStringAsFixed(2)}',
+                '${context.currencySymbol}${account.balance.toStringAsFixed(2)}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -484,7 +485,7 @@ class _IncomeScreenState extends State<IncomeScreen>
                   SizedBox(
                     width: 60,
                     child: Text(
-                      '\$${entry.value.toStringAsFixed(0)}',
+                      '${context.currencySymbol}${entry.value.toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -631,7 +632,7 @@ class _IncomeScreenState extends State<IncomeScreen>
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '+\$${income.amount.toStringAsFixed(2)}',
+              '+${context.currencySymbol}${income.amount.toStringAsFixed(2)}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'core/theme_bloc/theme_bloc.dart';
+import 'core/currency_bloc/currency_cubit.dart';
 import 'features/expenses/bloc/expense_bloc.dart';
 import 'features/income/bloc/income_bloc.dart';
 import 'features/ai/bloc/ai_bloc.dart';
@@ -32,6 +33,11 @@ void main() async {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => ThemeBloc()),
+          BlocProvider(
+            create: (context) => CurrencyCubit(
+              preferencesService: context.read<PreferencesService>(),
+            )..loadCurrency(),
+          ),
           BlocProvider(create: (_) => ExpenseBloc()),
           BlocProvider(create: (_) => AuthBloc()),
           BlocProvider(create: (_) => IncomeBloc()),

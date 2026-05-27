@@ -7,6 +7,7 @@ import '../../../model/income_model.dart';
 import '../bloc/income_bloc.dart';
 import '../bloc/income_event.dart';
 import '../bloc/income_state.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class AddIncomeScreen extends StatefulWidget {
   const AddIncomeScreen({super.key});
@@ -153,9 +154,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
-            decoration: const InputDecoration(
-              prefixText: '\$',
-              prefixStyle: TextStyle(
+            decoration: InputDecoration(
+              prefixText: context.currencySymbol,
+              prefixStyle: const TextStyle(
                 color: Colors.white,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -240,7 +241,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
                             ),
                             const Spacer(),
                             Text(
-                              '\$${account.balance.toStringAsFixed(2)}',
+                              '${context.currencySymbol}${account.balance.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[600],
