@@ -74,13 +74,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios,
             color: AppConstants.textSecondary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Add Expense',
           style: TextStyle(
             color: AppConstants.textPrimary,
@@ -146,7 +146,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Amount',
             style: TextStyle(
               color: AppConstants.cardColor,
@@ -157,14 +157,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
           const SizedBox(height: 8),
           TextFormField(
             controller: _amountController,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppConstants.cardColor,
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
             decoration: InputDecoration(
               prefixText: context.currencySymbol,
-              prefixStyle: const TextStyle(
+              prefixStyle: TextStyle(
                 color: AppConstants.cardColor,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -206,7 +206,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
             children: [
               Row(
                 children: [
-                  const Text(
+                  Text(
                     'Deduct from Account',
                     style: TextStyle(
                       fontSize: 16,
@@ -233,14 +233,15 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppConstants.cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String?>(
                     value: _selectedAccountId,
                     isExpanded: true,
+                    dropdownColor: AppConstants.cardColor,
                     hint: Row(
                       children: [
                         Icon(
@@ -418,7 +419,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Title',
           style: TextStyle(
             fontSize: 16,
@@ -429,11 +430,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         const SizedBox(height: 12),
         TextFormField(
           controller: _titleController,
+          style: TextStyle(color: AppConstants.textPrimary),
           decoration: InputDecoration(
             hintText: 'What did you spend on?',
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(color: AppConstants.textSecondary),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppConstants.cardColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -456,7 +458,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Category',
           style: TextStyle(
             fontSize: 16,
@@ -496,10 +498,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                   decoration: BoxDecoration(
                     color: isSelected
                         ? categoryColor.withOpacity(0.1)
-                        : Colors.white,
+                        : AppConstants.cardColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? categoryColor : Colors.grey[200]!,
+                      color: isSelected ? categoryColor : Colors.grey[800]!.withOpacity(0.1),
                       width: isSelected ? 2 : 1,
                     ),
                     boxShadow: isSelected
@@ -556,7 +558,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Date',
           style: TextStyle(
             fontSize: 16,
@@ -570,9 +572,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppConstants.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
             ),
             child: Row(
               children: [
@@ -580,7 +582,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
                 const SizedBox(width: 12),
                 Text(
                   DateFormat.yMMMMEEEEd().format(_selectedDate),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     color: AppConstants.textSecondary,
                   ),
@@ -603,7 +605,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Description (Optional)',
           style: TextStyle(
             fontSize: 16,
@@ -615,11 +617,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         TextFormField(
           controller: _descriptionController,
           maxLines: 3,
+          style: TextStyle(color: AppConstants.textPrimary),
           decoration: InputDecoration(
             hintText: 'Add any additional notes...',
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(color: AppConstants.textSecondary),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppConstants.cardColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -662,11 +665,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: AppConstants.primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: AppConstants.textSecondary,
+              surface: AppConstants.cardColor,
+              onSurface: AppConstants.textPrimary,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppConstants.cardColor,
             ),
           ),
           child: child!,

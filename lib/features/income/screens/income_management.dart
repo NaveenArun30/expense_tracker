@@ -241,12 +241,12 @@ class _IncomeScreenState extends State<IncomeScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Accounts',
               style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2D3748),
+                color: AppConstants.textPrimary,
               ),
             ),
             TextButton.icon(
@@ -274,9 +274,9 @@ class _IncomeScreenState extends State<IncomeScreen>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppConstants.cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
             ),
             child: Center(
               child: Column(
@@ -320,7 +320,7 @@ class _IncomeScreenState extends State<IncomeScreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -351,10 +351,10 @@ class _IncomeScreenState extends State<IncomeScreen>
               children: [
                 Text(
                   account.accountName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D3748),
+                    color: AppConstants.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -362,7 +362,7 @@ class _IncomeScreenState extends State<IncomeScreen>
                   'Created ${DateFormat.yMMMd().format(account.createdAt)}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppConstants.textSecondary,
                   ),
                 ),
               ],
@@ -405,7 +405,7 @@ class _IncomeScreenState extends State<IncomeScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -418,12 +418,12 @@ class _IncomeScreenState extends State<IncomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Income by Source',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -452,10 +452,10 @@ class _IncomeScreenState extends State<IncomeScreen>
                     flex: 2,
                     child: Text(
                       entry.key,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D3748),
+                        color: AppConstants.textPrimary,
                       ),
                     ),
                   ),
@@ -486,10 +486,10 @@ class _IncomeScreenState extends State<IncomeScreen>
                     width: 60,
                     child: Text(
                       '${context.currencySymbol}${entry.value.toStringAsFixed(0)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D3748),
+                        color: AppConstants.textPrimary,
                       ),
                       textAlign: TextAlign.right,
                     ),
@@ -508,9 +508,9 @@ class _IncomeScreenState extends State<IncomeScreen>
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppConstants.cardColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
         ),
         child: Center(
           child: Column(
@@ -539,12 +539,12 @@ class _IncomeScreenState extends State<IncomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Recent Income',
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3748),
+            color: AppConstants.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -570,7 +570,7 @@ class _IncomeScreenState extends State<IncomeScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -593,10 +593,10 @@ class _IncomeScreenState extends State<IncomeScreen>
         ),
         title: Text(
           income.accountName,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF2D3748),
+            color: AppConstants.textPrimary,
           ),
         ),
         subtitle: Column(
@@ -615,7 +615,7 @@ class _IncomeScreenState extends State<IncomeScreen>
               const SizedBox(height: 2),
               Text(
                 income.description!,
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: AppConstants.textSecondary, fontSize: 12),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

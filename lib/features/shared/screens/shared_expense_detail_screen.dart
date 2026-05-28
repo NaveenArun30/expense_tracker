@@ -45,19 +45,27 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppConstants.cardColor,
         title: Text(
           currentlyPaid ? 'Mark as Pending?' : 'Mark as Paid?',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppConstants.textPrimary,
+          ),
         ),
         content: Text(
           currentlyPaid
               ? 'Are you sure you want to mark this payment as pending?'
               : 'Confirm that this person has paid their share of ${context.currencySymbol}${split.amount.toStringAsFixed(2)}?',
+          style: TextStyle(color: AppConstants.textSecondary),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
+            style: TextButton.styleFrom(
+              foregroundColor: AppConstants.textSecondary,
+            ),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -168,7 +176,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
                       children: [
-                        const Text(
+                        Text(
                           'Split Details',
                           style: TextStyle(
                             fontSize: 20,
@@ -208,12 +216,14 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                             Icon(
                               Icons.info_outline,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: AppConstants.textTertiary,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'No splits found for this expense.',
-                              style: TextStyle(color: Colors.grey[600]),
+                              style: TextStyle(
+                                color: AppConstants.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -232,11 +242,18 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
+                Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppConstants.textTertiary,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Could not load expense details',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  style: TextStyle(
+                    color: AppConstants.textSecondary,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -451,7 +468,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppConstants.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: AppConstants.successColor.withOpacity(0.3),
@@ -505,7 +522,10 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                   const SizedBox(height: 4),
                   Text(
                     '${((totalPaid / total) * 100).toStringAsFixed(0)}% of total',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                    style: TextStyle(
+                      color: AppConstants.textSecondary,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -516,7 +536,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppConstants.cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: AppConstants.warningColor.withOpacity(0.3),
@@ -570,7 +590,10 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                   const SizedBox(height: 4),
                   Text(
                     '${((totalPending / total) * 100).toStringAsFixed(0)}% of total',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                    style: TextStyle(
+                      color: AppConstants.textSecondary,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
@@ -592,7 +615,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isPaid
@@ -619,7 +642,14 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
               end: Alignment.bottomRight,
               colors: isMe
                   ? [AppConstants.primaryColor, AppConstants.primaryLight]
-                  : [Colors.grey[300]!, Colors.grey[400]!],
+                  : [
+                      AppConstants.isDark
+                          ? Colors.grey[800]!
+                          : Colors.grey[300]!,
+                      AppConstants.isDark
+                          ? Colors.grey[700]!
+                          : Colors.grey[400]!,
+                    ],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
@@ -637,7 +667,11 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
               style: TextStyle(
                 fontSize: isMe ? 24 : 16,
                 fontWeight: FontWeight.bold,
-                color: isMe ? Colors.white : Colors.grey[700],
+                color: isMe
+                    ? Colors.white
+                    : (AppConstants.isDark
+                          ? Colors.grey[300]!
+                          : Colors.grey[700]!),
               ),
             ),
           ),
@@ -646,7 +680,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
           children: [
             Text(
               isMe ? 'You' : 'Member ${split.userId.substring(0, 6)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: AppConstants.textPrimary,

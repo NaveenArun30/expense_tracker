@@ -48,7 +48,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Create New Group',
                 style: TextStyle(
@@ -72,7 +72,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
             TextField(
               controller: controller,
               autofocus: true,
-              style: const TextStyle(color: AppConstants.textPrimary),
+              style: TextStyle(color: AppConstants.textPrimary),
               decoration: InputDecoration(
                 hintText: 'e.g., Weekend Trip',
                 hintStyle: TextStyle(color: AppConstants.textHint),
@@ -161,7 +161,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
                 'Join Group',
                 style: TextStyle(
@@ -186,7 +186,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
               controller: controller,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppConstants.textPrimary,
                 letterSpacing: 2,
                 fontWeight: FontWeight.w600,
@@ -376,7 +376,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Oops! Something went wrong',
                       style: TextStyle(
                         color: AppConstants.textPrimary,
@@ -452,7 +452,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      const Text(
+                      Text(
                         'No groups yet',
                         style: TextStyle(
                           color: AppConstants.textPrimary,
@@ -684,7 +684,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                                           group.name,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: AppConstants.textPrimary,
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,

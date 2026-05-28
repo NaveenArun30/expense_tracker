@@ -75,7 +75,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                   const SizedBox(height: 16),
                   Text(
                     state.message,
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: TextStyle(color: AppConstants.textSecondary),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -104,13 +104,13 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                               Icon(
                                 Icons.receipt_long_outlined,
                                 size: 64,
-                                color: Colors.grey[400],
+                                color: AppConstants.textTertiary,
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'No expenses yet',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: AppConstants.textSecondary,
                                   fontSize: 16,
                                 ),
                               ),
@@ -118,7 +118,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                               Text(
                                 'Add your first expense!',
                                 style: TextStyle(
-                                  color: Colors.grey[500],
+                                  color: AppConstants.textTertiary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -135,11 +135,11 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppConstants.cardColor,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
                                     blurRadius: 5,
                                     offset: const Offset(0, 2),
                                   ),
@@ -165,22 +165,24 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                 ),
                                 title: Text(
                                   expense.description,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
+                                    color: AppConstants.textPrimary,
                                   ),
                                 ),
                                 subtitle: Text(
                                   'Paid by ${expense.paidBy.substring(0, 4)}... \n${DateFormat.yMMMd().format(expense.date)}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: AppConstants.textSecondary,
                                   ),
                                 ),
                                 trailing: Text(
                                   '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
+                                    color: AppConstants.textPrimary,
                                   ),
                                 ),
                                 onTap: () {
@@ -230,7 +232,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
   Widget _buildBalanceSummary(GroupDetailsLoaded state) {
     return Container(
       padding: const EdgeInsets.all(20),
-      color: Colors.white,
+      color: AppConstants.cardColor,
       child: Column(
         children: [
           Row(
@@ -238,9 +240,10 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
             children: [
               Text(
                 state.group.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: AppConstants.textPrimary,
                 ),
               ),
               Container(

@@ -13,6 +13,9 @@ import 'security_settings_screen.dart';
 import '../../core/currency_bloc/currency_cubit.dart';
 import '../../core/currency_bloc/currency_state.dart';
 import '../../model/currency_model.dart';
+import '../../core/budget_bloc/budget_cubit.dart';
+import '../../core/budget_bloc/budget_state.dart';
+import 'budget_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -69,39 +72,60 @@ class SettingsScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       BlocBuilder<CurrencyCubit, CurrencyState>(
                         builder: (context, currencyState) {
-                          return _buildSettingsCard([
-                            _buildSwitchTile(
-                              'Dark Mode',
-                              'Switch between light and dark theme',
-                              Icons.dark_mode,
-                              themeState.isDark,
-                              (_) =>
-                                  context.read<ThemeBloc>().add(ToggleTheme()),
-                            ),
-                            _buildListTile(
-                              'Currency',
-                              'Selected: ${currencyState.selectedCurrency.name} (${currencyState.selectedCurrency.symbol})',
-                              Icons.currency_exchange,
-                              Colors.teal,
-                              () => _showCurrencySelectorDialog(
-                                context,
-                                currencyState.selectedCurrency,
-                              ),
-                            ),
-                            _buildListTile(
-                              'Security',
-                              'Biometrics & PIN',
-                              Icons.security,
-                              Colors.blue,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const SecuritySettingsScreen(),
+                          return BlocBuilder<BudgetCubit, BudgetState>(
+                            builder: (context, budgetState) {
+                              final currencySymbol = currencyState.selectedCurrency.symbol;
+                              final formattedMonthly = '$currencySymbol${budgetState.monthlyBudget.toStringAsFixed(0)}';
+                              final formattedYearly = '$currencySymbol${budgetState.yearlyBudget.toStringAsFixed(0)}';
+
+                              return _buildSettingsCard([
+                                _buildSwitchTile(
+                                  'Dark Mode',
+                                  'Switch between light and dark theme',
+                                  Icons.dark_mode,
+                                  themeState.isDark,
+                                  (_) =>
+                                      context.read<ThemeBloc>().add(ToggleTheme()),
                                 ),
-                              ),
-                            ),
-                          ]);
+                                _buildListTile(
+                                  'Currency',
+                                  'Selected: ${currencyState.selectedCurrency.name} (${currencyState.selectedCurrency.symbol})',
+                                  Icons.currency_exchange,
+                                  Colors.teal,
+                                  () => _showCurrencySelectorDialog(
+                                    context,
+                                    currencyState.selectedCurrency,
+                                  ),
+                                ),
+                                _buildListTile(
+                                  'Budget Settings',
+                                  'Monthly: $formattedMonthly | Yearly: $formattedYearly',
+                                  Icons.wallet,
+                                  Colors.purple,
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const BudgetSettingsScreen(),
+                                    ),
+                                  ),
+                                ),
+                                _buildListTile(
+                                  'Security',
+                                  'Biometrics & PIN',
+                                  Icons.security,
+                                  Colors.blue,
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const SecuritySettingsScreen(),
+                                    ),
+                                  ),
+                                ),
+                              ]);
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 24),
@@ -269,10 +293,10 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: Color(0xFF2D3748),
+        color: AppConstants.textPrimary,
       ),
     );
   }
@@ -280,7 +304,7 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildSettingsCard(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -313,15 +337,15 @@ class SettingsScreen extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF2D3748),
+          color: AppConstants.textPrimary,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        style: TextStyle(fontSize: 12, color: AppConstants.textSecondary),
       ),
       trailing: Switch(
         value: value,
@@ -350,15 +374,15 @@ class SettingsScreen extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF2D3748),
+          color: AppConstants.textPrimary,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        style: TextStyle(fontSize: 12, color: AppConstants.textSecondary),
       ),
       trailing: const Icon(
         Icons.arrow_forward_ios,
@@ -380,17 +404,17 @@ class SettingsScreen extends StatelessWidget {
         ),
         child: const Icon(Icons.key, color: Colors.purple, size: 20),
       ),
-      title: const Text(
+      title: Text(
         'Omni AI Key',
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF2D3748),
+          color: AppConstants.textPrimary,
         ),
       ),
-      subtitle: const Text(
+      subtitle: Text(
         'Configure Gemini API Key',
-        style: TextStyle(fontSize: 12, color: Colors.grey),
+        style: TextStyle(fontSize: 12, color: AppConstants.textSecondary),
       ),
       trailing: const Icon(
         Icons.arrow_forward_ios,
@@ -599,4 +623,5 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
+
 }

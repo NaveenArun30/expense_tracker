@@ -99,7 +99,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppConstants.cardColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(

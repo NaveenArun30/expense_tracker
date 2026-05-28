@@ -188,16 +188,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppConstants.cardColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.purple.withOpacity(0.05),
+                color: Colors.purple.withOpacity(AppConstants.isDark ? 0.2 : 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
             ],
-            border: Border.all(color: Colors.purple.withOpacity(0.1)),
+            border: Border.all(color: Colors.purple.withOpacity(AppConstants.isDark ? 0.3 : 0.1)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +214,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2D3748),
+                          color: AppConstants.textPrimary,
                         ),
                       ),
                     ],
@@ -345,11 +345,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -358,12 +358,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Select Period',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -372,12 +372,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               Expanded(
                 flex: 2,
                 child: DropdownButtonFormField<int>(
+                  dropdownColor: AppConstants.cardColor,
+                  style: TextStyle(color: AppConstants.textPrimary, fontSize: 16),
                   value: _selectedMonth,
                   decoration: InputDecoration(
                     labelText: 'Month',
+                    labelStyle: TextStyle(color: AppConstants.textSecondary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      borderSide: BorderSide(color: AppConstants.isDark ? Colors.grey[800]! : Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -391,7 +394,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   items: List.generate(12, (index) {
                     return DropdownMenuItem(
                       value: index + 1,
-                      child: Text(months[index]),
+                      child: Text(
+                        months[index],
+                        style: TextStyle(color: AppConstants.textPrimary),
+                      ),
                     );
                   }),
                   onChanged: (value) {
@@ -405,12 +411,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<int>(
+                  dropdownColor: AppConstants.cardColor,
+                  style: TextStyle(color: AppConstants.textPrimary, fontSize: 16),
                   value: _selectedYear,
                   decoration: InputDecoration(
                     labelText: 'Year',
+                    labelStyle: TextStyle(color: AppConstants.textSecondary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      borderSide: BorderSide(color: AppConstants.isDark ? Colors.grey[800]! : Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -424,7 +433,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   items: years.map((year) {
                     return DropdownMenuItem(
                       value: year,
-                      child: Text(year.toString()),
+                      child: Text(
+                        year.toString(),
+                        style: TextStyle(color: AppConstants.textPrimary),
+                      ),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -484,11 +496,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -514,7 +526,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             ),
           ),
           const SizedBox(height: 4),
-          Text(title, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          Text(title, style: TextStyle(fontSize: 12, color: AppConstants.textSecondary)),
         ],
       ),
     );
@@ -525,11 +537,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppConstants.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -538,12 +550,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Monthly Calendar',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2D3748),
+                color: AppConstants.textPrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -551,7 +563,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 ? Center(
                     child: Text(
                       'No expenses for this period',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: AppConstants.textSecondary),
                     ),
                   )
                 : _buildCalendarView(state.expenses),
@@ -589,7 +601,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[700],
+                    color: AppConstants.textSecondary,
                   ),
                 ),
               ),
@@ -634,7 +646,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       ? AppConstants.primaryColor
                       : hasExpense
                       ? AppConstants.primaryColor.withOpacity(0.3)
-                      : Colors.grey[200]!,
+                      : (AppConstants.isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!),
                   width: isToday ? 2 : 1,
                 ),
               ),
@@ -649,8 +661,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       color: isToday
                           ? AppConstants.primaryColor
                           : hasExpense
-                          ? const Color(0xFF2D3748)
-                          : Colors.grey[600],
+                          ? AppConstants.textPrimary
+                          : AppConstants.textSecondary,
                     ),
                   ),
                   if (hasExpense) ...[
@@ -680,11 +692,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -693,12 +705,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Category Distribution',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -708,7 +720,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 ? Center(
                     child: Text(
                       'No expenses for this period',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: AppConstants.textSecondary),
                     ),
                   )
                 : PieChart(_buildPieChartData(state.categoryTotals)),
@@ -752,11 +764,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppConstants.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -765,7 +777,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         child: Center(
           child: Text(
             'No category data available',
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: AppConstants.textSecondary),
           ),
         ),
       );
@@ -777,11 +789,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -790,12 +802,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Category Breakdown',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -824,16 +836,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                       children: [
                         Text(
                           entry.key,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: AppConstants.textPrimary,
                           ),
                         ),
                         Text(
                           '${percentage.toStringAsFixed(1)}% of total',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: AppConstants.textSecondary,
                           ),
                         ),
                       ],
@@ -841,9 +854,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   ),
                   Text(
                     '${entry.value.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: AppConstants.textPrimary,
                     ),
                   ),
                 ],
@@ -859,11 +873,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -872,12 +886,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Weekly Spending Trend',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 20),
@@ -887,7 +901,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 ? Center(
                     child: Text(
                       'No expenses for this period',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: AppConstants.textSecondary),
                     ),
                   )
                 : BarChart(_buildBarChartData(state)),
@@ -939,7 +953,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             getTitlesWidget: (value, meta) {
               return Text(
                 '${value.toInt()}',
-                style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 10, color: AppConstants.textSecondary),
               );
             },
           ),
@@ -950,7 +964,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
             getTitlesWidget: (value, meta) {
               return Text(
                 weekDays[value.toInt()],
-                style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 10, color: AppConstants.textSecondary),
               );
             },
           ),
@@ -988,11 +1002,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppConstants.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -1001,7 +1015,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         child: Center(
           child: Text(
             'No weekly data available',
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: AppConstants.textSecondary),
           ),
         ),
       );
@@ -1036,11 +1050,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppConstants.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -1049,7 +1063,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         child: Center(
           child: Text(
             'No weekly data available',
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: AppConstants.textSecondary),
           ),
         ),
       );
@@ -1068,11 +1082,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1081,12 +1095,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Weekly Insights',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -1144,16 +1158,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: AppConstants.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
                 subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2D3748),
+                  color: AppConstants.textPrimary,
                 ),
               ),
             ],
@@ -1176,11 +1190,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppConstants.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -1189,7 +1203,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         child: Center(
           child: Text(
             'No spending data available',
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: AppConstants.textSecondary),
           ),
         ),
       );
@@ -1215,11 +1229,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(AppConstants.isDark ? 0.3 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -1228,12 +1242,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Spending Insights',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF2D3748),
+              color: AppConstants.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -1304,23 +1318,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   title,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppConstants.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D3748),
+                    color: AppConstants.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 10, color: AppConstants.textSecondary),
                 ),
               ],
             ),

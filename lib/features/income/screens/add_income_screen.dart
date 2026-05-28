@@ -68,13 +68,13 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios,
             color: AppConstants.textSecondary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Add Income',
           style: TextStyle(
             color: AppConstants.textPrimary,
@@ -200,7 +200,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Select Account',
                 style: TextStyle(
                   fontSize: 16,
@@ -212,14 +212,15 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppConstants.cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _selectedAccountId,
                     isExpanded: true,
+                    dropdownColor: AppConstants.cardColor,
                     icon: const Icon(Icons.arrow_drop_down),
                     items: state.accounts.map((account) {
                       return DropdownMenuItem(
@@ -234,9 +235,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
                             const SizedBox(width: 12),
                             Text(
                               account.accountName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
+                                color: AppConstants.textPrimary,
                               ),
                             ),
                             const Spacer(),
@@ -244,7 +246,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
                               '${context.currencySymbol}${account.balance.toStringAsFixed(2)}',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: AppConstants.textSecondary,
                               ),
                             ),
                           ],
@@ -291,7 +293,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Income Source',
           style: TextStyle(
             fontSize: 16,
@@ -331,10 +333,10 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
                   decoration: BoxDecoration(
                     color: isSelected
                         ? sourceColor.withOpacity(0.1)
-                        : Colors.white,
+                        : AppConstants.cardColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? sourceColor : Colors.grey[200]!,
+                      color: isSelected ? sourceColor : Colors.grey[800]!.withOpacity(0.1),
                       width: isSelected ? 2 : 1,
                     ),
                     boxShadow: isSelected
@@ -388,7 +390,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Date',
           style: TextStyle(
             fontSize: 16,
@@ -402,9 +404,9 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppConstants.cardColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
+              border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
             ),
             child: Row(
               children: [
@@ -412,7 +414,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
                 const SizedBox(width: 12),
                 Text(
                   DateFormat.yMMMMEEEEd().format(_selectedDate),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     color: AppConstants.textSecondary,
                   ),
@@ -435,7 +437,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Description (Optional)',
           style: TextStyle(
             fontSize: 16,
@@ -447,11 +449,12 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
         TextFormField(
           controller: _descriptionController,
           maxLines: 3,
+          style: TextStyle(color: AppConstants.textPrimary),
           decoration: InputDecoration(
             hintText: 'Add any additional notes...',
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(color: AppConstants.textSecondary),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppConstants.cardColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -494,11 +497,14 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: AppConstants.successColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: AppConstants.textSecondary,
+              surface: AppConstants.cardColor,
+              onSurface: AppConstants.textPrimary,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppConstants.cardColor,
             ),
           ),
           child: child!,
