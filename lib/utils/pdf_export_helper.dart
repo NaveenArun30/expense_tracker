@@ -10,8 +10,9 @@ import '../model/expense_model.dart';
 class PdfExportHelper {
   static Future<String?> generateExpenseReport(
     List<ExpenseModel> expenses,
-    String dateRange,
-  ) async {
+    String dateRange, {
+    String currencySymbol = '\$',
+  }) async {
     final pdf = pw.Document();
 
     final totalAmount = expenses.fold(
@@ -149,7 +150,7 @@ class PdfExportHelper {
                       ),
                       pw.SizedBox(height: 8),
                       pw.Text(
-                        '\$${totalAmount.toStringAsFixed(2)}',
+                        '$currencySymbol${totalAmount.toStringAsFixed(2)}',
                         style: pw.TextStyle(
                           fontWeight: pw.FontWeight.bold,
                           fontSize: 20,
@@ -175,7 +176,7 @@ class PdfExportHelper {
             pw.SizedBox(height: 10),
 
             // Transactions Table
-            _buildTransactionsTable(expenses),
+            _buildTransactionsTable(expenses, currencySymbol: currencySymbol),
           ];
         },
         footer: (pw.Context context) {
@@ -205,7 +206,10 @@ class PdfExportHelper {
     return resultPath;
   }
 
-  static pw.Widget _buildTransactionsTable(List<ExpenseModel> expenses) {
+  static pw.Widget _buildTransactionsTable(
+    List<ExpenseModel> expenses, {
+    String currencySymbol = '\$',
+  }) {
     if (expenses.isEmpty) {
       return pw.Padding(
         padding: const pw.EdgeInsets.all(20),
@@ -229,7 +233,7 @@ class PdfExportHelper {
           DateFormat('MMM dd, yyyy').format(expense.date),
           expense.title,
           expense.category,
-          '\$${expense.amount.toStringAsFixed(2)}',
+          '$currencySymbol${expense.amount.toStringAsFixed(2)}',
         ];
       }).toList(),
       border: null,

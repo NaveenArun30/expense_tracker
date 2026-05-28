@@ -10,9 +10,17 @@ import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
 import '../../../utils/pdf_export_helper.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class ExpenseLogScreen extends StatefulWidget {
-  const ExpenseLogScreen({super.key});
+  final DateTime? selectedMonth;
+  final DateTimeRange? selectedDateRange;
+
+  const ExpenseLogScreen({
+    super.key,
+    this.selectedMonth,
+    this.selectedDateRange,
+  });
 
   @override
   State<ExpenseLogScreen> createState() => _ExpenseLogScreenState();
@@ -31,13 +39,53 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
   DateTime? _customStartDate;
   DateTime? _customEndDate;
 
+  late ScrollController _scrollController;
+  int _visibleExpensesCount = 20;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController()..addListener(_onScroll);
     // Load expenses when screen is first opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ExpenseBloc>().add(LoadExpenses());
+      _loadInitialExpenses();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _loadInitialExpenses() {
+    if (widget.selectedMonth != null) {
+      context.read<ExpenseBloc>().add(LoadExpenses(month: widget.selectedMonth));
+    } else if (widget.selectedDateRange != null) {
+      context.read<ExpenseBloc>().add(
+        LoadExpensesByDateRange(
+          startDate: widget.selectedDateRange!.start,
+          endDate: widget.selectedDateRange!.end,
+        ),
+      );
+    } else {
+      context.read<ExpenseBloc>().add(LoadExpenses());
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<ExpenseBloc>().state;
+      if (state is ExpenseLoaded) {
+        if (_visibleExpensesCount < state.expenses.length) {
+          setState(() {
+            _visibleExpensesCount =
+                (_visibleExpensesCount + 20).clamp(0, state.expenses.length);
+          });
+        }
+      }
+    }
   }
 
   @override
@@ -111,12 +159,12 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Filter Transactions',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2D3748),
+                  color: AppConstants.textPrimary,
                 ),
               ),
               if (state is ExpenseLoaded && state.expenses.isNotEmpty)
@@ -152,18 +200,18 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppConstants.primaryColor
-                            : Colors.grey[100],
+                            : AppConstants.cardColor,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
                               ? AppConstants.primaryColor
-                              : Colors.grey[300]!,
+                              : Colors.grey[800]!.withOpacity(0.1),
                         ),
                       ),
                       child: Text(
                         filter,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey[600],
+                          color: isSelected ? Colors.white : AppConstants.textSecondary,
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
@@ -261,7 +309,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '\$${state.totalAmount.toStringAsFixed(2)}',
+                    '${context.currencySymbol}${state.totalAmount.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppConstants.textOnPrimary,
                       fontSize: 28,
@@ -345,9 +393,11 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         );
       }
 
+      final visibleExpenses = state.expenses.take(_visibleExpensesCount).toList();
+
       // Group expenses by date
       Map<String, List<ExpenseModel>> groupedExpenses = {};
-      for (var expense in state.expenses) {
+      for (var expense in visibleExpenses) {
         final dateKey = DateFormat('yyyy-MM-dd').format(expense.date);
         if (!groupedExpenses.containsKey(dateKey)) {
           groupedExpenses[dateKey] = [];
@@ -358,10 +408,24 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       final sortedDates = groupedExpenses.keys.toList()
         ..sort((a, b) => b.compareTo(a));
 
+      final hasMore = _visibleExpensesCount < state.expenses.length;
+
       return ListView.builder(
+        controller: _scrollController,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: sortedDates.length,
+        itemCount: sortedDates.length + (hasMore ? 1 : 0),
         itemBuilder: (context, index) {
+          if (index == sortedDates.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppConstants.primaryColor,
+                ),
+              ),
+            );
+          }
           final dateKey = sortedDates[index];
           final dayExpenses = groupedExpenses[dateKey]!;
           final date = DateTime.parse(dateKey);
@@ -380,9 +444,9 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: AppConstants.cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: Colors.grey[800]!.withOpacity(0.1)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -392,10 +456,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                       children: [
                         Text(
                           _formatDateHeader(date),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF2D3748),
+                            color: AppConstants.textPrimary,
                           ),
                         ),
                         Text(
@@ -408,7 +472,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                       ],
                     ),
                     Text(
-                      '\$${dayTotal.toStringAsFixed(2)}',
+                      '${context.currencySymbol}${dayTotal.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -481,7 +545,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -504,10 +568,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         ),
         title: Text(
           expense.title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
-            color: Color(0xFF2D3748),
+            color: AppConstants.textPrimary,
           ),
         ),
         subtitle: Column(
@@ -527,7 +591,7 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
               const SizedBox(height: 2),
               Text(
                 expense.description!,
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: AppConstants.textSecondary, fontSize: 12),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -544,11 +608,11 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '\$${expense.amount.toStringAsFixed(2)}',
-              style: const TextStyle(
+              '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: Color(0xFF2D3748),
+                color: AppConstants.textPrimary,
               ),
             ),
           ],
@@ -578,9 +642,13 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
   void _applyFilter(BuildContext context, String filter) async {
     final now = DateTime.now();
 
+    setState(() {
+      _visibleExpensesCount = 20;
+    });
+
     switch (filter) {
       case 'All':
-        context.read<ExpenseBloc>().add(LoadExpenses());
+        _loadInitialExpenses();
         break;
 
       case 'This Week':
@@ -709,7 +777,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       try {
         final dateRangeStr = _getFilterDateRangeString();
         final filePath = await PdfExportHelper.generateExpenseReport(
-            state.expenses, dateRangeStr);
+          state.expenses,
+          dateRangeStr,
+          currencySymbol: context.currencySymbol,
+        );
         
         if (context.mounted && filePath != null) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
+  static bool isDark = false;
+
   static const List<String> categories = [
     'Food & Dining',
     'Transportation',
@@ -49,17 +51,17 @@ class AppConstants {
   static const Color secondaryDark = Color(0xFF00A896);
 
   // Background Colors
-  static const Color backgroundColor = Color(0xFFF8F9FA);
-  static const Color surfaceColor = Color(0xFFFFFFFF);
-  static const Color cardColor = Color(0xFFFFFFFF);
+  static Color get backgroundColor => isDark ? const Color(0xFF0C0D14) : const Color(0xFFF8F9FA);
+  static Color get surfaceColor => isDark ? const Color(0xFF161722) : const Color(0xFFFFFFFF);
+  static Color get cardColor => isDark ? const Color(0xFF161722) : const Color(0xFFFFFFFF);
 
   // Text Colors
-  static const Color textPrimary = Color(0xFF2D3748);
+  static Color get textPrimary => isDark ? Colors.white : const Color(0xFF2D3748);
   static const Color black = Colors.black;
 
-  static const Color textSecondary = Color(0xFF4A5568);
-  static const Color textTertiary = Color(0xFF718096);
-  static const Color textHint = Color(0xFF9CA3AF);
+  static Color get textSecondary => isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF4A5568);
+  static Color get textTertiary => isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF718096);
+  static Color get textHint => isDark ? Colors.white.withOpacity(0.3) : const Color(0xFF9CA3AF);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color textOnDark = Color(0xFFFFFFFF);
 

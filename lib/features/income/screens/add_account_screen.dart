@@ -5,6 +5,7 @@ import '../../../constants/app_constants.dart';
 import '../../../model/income_model.dart';
 import '../bloc/income_bloc.dart';
 import '../bloc/income_event.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 
 class AddAccountScreen extends StatefulWidget {
   const AddAccountScreen({super.key});
@@ -61,13 +62,13 @@ class _AddAccountScreenState extends State<AddAccountScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios,
             color: AppConstants.textSecondary,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Add Account',
           style: TextStyle(
             color: AppConstants.textPrimary,
@@ -143,9 +144,9 @@ class _AddAccountScreenState extends State<AddAccountScreen>
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
-            decoration: const InputDecoration(
-              prefixText: '\$',
-              prefixStyle: TextStyle(
+            decoration: InputDecoration(
+              prefixText: context.currencySymbol,
+              prefixStyle: const TextStyle(
                 color: Colors.white,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -182,7 +183,7 @@ class _AddAccountScreenState extends State<AddAccountScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Account Name',
           style: TextStyle(
             fontSize: 16,
@@ -193,11 +194,12 @@ class _AddAccountScreenState extends State<AddAccountScreen>
         const SizedBox(height: 12),
         TextFormField(
           controller: _accountNameController,
+          style: TextStyle(color: AppConstants.textPrimary),
           decoration: InputDecoration(
             hintText: 'e.g., Main Account, Savings, Cash',
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(color: AppConstants.textSecondary),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppConstants.cardColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,

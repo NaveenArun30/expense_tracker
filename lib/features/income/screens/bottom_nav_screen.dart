@@ -1,7 +1,9 @@
-import 'package:cuberto_bottom_bar/cuberto_bottom_bar.dart';
 import 'package:expense_tracker_app/constants/app_constants.dart';
+// import 'package:expense_tracker_app/features/expenses/screens/analytics_screen.dart';
 import 'package:expense_tracker_app/features/expenses/screens/home_screen.dart';
+import 'package:expense_tracker_app/features/expenses/screens/add_expense_screen.dart';
 import 'package:expense_tracker_app/features/income/screens/income_management.dart';
+import 'package:expense_tracker_app/features/shared/screens/shared_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +11,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../expenses/bloc/expense_bloc.dart';
 import '../../expenses/bloc/expense_event.dart';
 import '../../settings/settings_screen.dart';
-import '../../shared/screens/shared_dashboard_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -18,10 +19,13 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends State<MainNavigationScreen>
+    with SingleTickerProviderStateMixin {
   int _currentPage = 0;
-  final PageController _pageController = PageController();
+  late AnimationController _fabAnimController;
 
+  // Pages: 0=Home, 1=Trends (Analytics), 2=Budget (Income), 3=Profile (Settings)
+  // The center ADD button (nav tap-index 2) pushes a route – it is NOT a page tab.
   final List<Widget> _screens = [
     const HomeScreen(),
     const IncomeScreen(),
@@ -33,6 +37,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     context.read<ExpenseBloc>().add(LoadExpenses());
+    _fabAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -44,76 +52,212 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _fabAnimController.dispose();
     super.dispose();
+  }
+
+  // Map nav-row tap index → page index (skip the centre ADD at tap-index 2)
+  int _navIndexToPageIndex(int navIndex) {
+    if (navIndex < 2) return navIndex;
+    return navIndex - 1; // nav 3→page 2, nav 4→page 3
+  }
+
+  void _onNavTap(int navIndex) {
+    if (navIndex == 2) {
+      _openAddExpense();
+      return;
+    }
+    setState(() => _currentPage = _navIndexToPageIndex(navIndex));
+  }
+
+  Future<void> _openAddExpense() async {
+    _fabAnimController.forward().then((_) => _fabAnimController.reverse());
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
+    );
+    if (mounted) context.read<ExpenseBloc>().add(LoadExpenses());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-          });
-        },
-        children: _screens,
-      ),
-      bottomNavigationBar: CubertoBottomBar(
-        key: const Key("BottomBar"),
-        inactiveIconColor: Colors.grey.shade400,
-        tabStyle: CubertoTabStyle.styleNormal,
-        selectedTab: _currentPage,
-        tabs: [
-          TabData(
-            key: const Key("Expenses"),
-            iconData: Icons.receipt_long_rounded,
-            title: "Expenses",
-            tabColor: AppConstants.primaryColor,
-            tabGradient: LinearGradient(
-              colors: AppConstants.primaryGradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          TabData(
-            key: const Key("Income"),
-            iconData: Icons.trending_up_rounded,
-            title: "Income",
-            tabColor: AppConstants.successColor,
-            tabGradient: LinearGradient(
-              colors: [
-                AppConstants.successColor,
-                AppConstants.successColor.withOpacity(0.7),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          TabData(
-            key: const Key("Profile"),
-            iconData: Icons.person_rounded,
-            title: "Profile",
-            tabColor: const Color(0xFF667eea),
-            tabGradient: const LinearGradient(
-              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      body: IndexedStack(index: _currentPage, children: _screens),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    final isDark = AppConstants.isDark;
+    final bgColor = isDark ? const Color(0xFF1A1B2E) : Colors.white;
+    final shadowColor = isDark
+        ? Colors.black.withValues(alpha: 0.4)
+        : Colors.black.withValues(alpha: 0.08);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : Colors.black.withValues(alpha: 0.06);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: Border(top: BorderSide(color: borderColor, width: 1)),
+        boxShadow: [
+          BoxShadow(
+            color: shadowColor,
+            blurRadius: 20,
+            offset: const Offset(0, -4),
           ),
         ],
-        onTabChangedListener: (position, title, color) {
-          setState(() {
-            _currentPage = position;
-          });
-          _pageController.animateToPage(
-            position,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        },
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildNavItem(
+                navIndex: 0,
+                icon: Icons.grid_view_rounded,
+                label: 'HOME',
+              ),
+              _buildNavItem(
+                navIndex: 1,
+                icon: Icons.account_balance_wallet_rounded,
+                label: 'INCOME',
+              ),
+              _buildAddButton(),
+              _buildNavItem(navIndex: 3, icon: Icons.group, label: 'SHARED'),
+              _buildNavItem(
+                navIndex: 4,
+                icon: Icons.person_rounded,
+                label: 'PROFILE',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int navIndex,
+    required IconData icon,
+    required String label,
+  }) {
+    final pageIndex = _navIndexToPageIndex(navIndex);
+    final isSelected = _currentPage == pageIndex;
+    const accentColor = Color(0xFF8B5CF6);
+    final inactiveColor = AppConstants.isDark
+        ? Colors.white.withValues(alpha: 0.4)
+        : Colors.black.withValues(alpha: 0.35);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onNavTap(navIndex),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? accentColor.withValues(alpha: 0.18)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: isSelected ? accentColor : inactiveColor,
+                ),
+              ),
+              const SizedBox(height: 3),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: isSelected ? accentColor : inactiveColor,
+                ),
+                child: Text(label),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton() {
+    final inactiveColor = AppConstants.isDark
+        ? Colors.white.withValues(alpha: 0.4)
+        : Colors.black.withValues(alpha: 0.35);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onNavTap(2),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ScaleTransition(
+              scale: Tween<double>(begin: 1.0, end: 0.88).animate(
+                CurvedAnimation(
+                  parent: _fabAnimController,
+                  curve: Curves.easeInOut,
+                ),
+              ),
+              child: Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.add_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              'ADD',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+                color: inactiveColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

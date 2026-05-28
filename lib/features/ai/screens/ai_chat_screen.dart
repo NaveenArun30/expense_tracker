@@ -94,11 +94,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       decoration: BoxDecoration(
                         color: msg.isUser
                             ? AppConstants.primaryColor
-                            : Colors.white,
+                            : AppConstants.cardColor,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withOpacity(AppConstants.isDark ? 0.2 : 0.05),
                             blurRadius: 5,
                             offset: const Offset(0, 2),
                           ),
@@ -109,7 +109,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                               msg.text,
                               style: const TextStyle(color: Colors.white),
                             )
-                          : MarkdownBody(data: msg.text),
+                          : MarkdownBody(
+                              data: msg.text,
+                              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
+                            ),
                     ),
                   );
                 },
@@ -124,13 +127,30 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: _controller,
+                      style: TextStyle(color: AppConstants.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Ask about your finances...',
+                        hintStyle: TextStyle(color: AppConstants.textHint),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: AppConstants.cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(
+                            color: AppConstants.isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.transparent,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide(
+                            color: AppConstants.primaryColor,
+                            width: 1.5,
+                          ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,

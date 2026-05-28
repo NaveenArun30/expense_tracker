@@ -345,11 +345,14 @@ class _DateRangePickerWidgetState extends State<DateRangePickerWidget> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
               primary: AppConstants.primaryColor,
               onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: const Color(0xFF2D3748),
+              surface: AppConstants.cardColor,
+              onSurface: AppConstants.textPrimary,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppConstants.cardColor,
             ),
           ),
           child: child!,

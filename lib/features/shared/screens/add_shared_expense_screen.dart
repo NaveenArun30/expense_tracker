@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../constants/app_constants.dart';
+import '../../../core/currency_bloc/currency_cubit.dart';
 import '../bloc/shared_bloc.dart';
 import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
@@ -150,7 +151,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
         });
         errorMsg = 'Percentages add up to ${totalPct.toStringAsFixed(1)}%, they must equal 100%.';
       } else if (_splitType == 'exact') {
-        errorMsg = 'Exact amounts add up to \$${totalSplit.toStringAsFixed(2)}, but total is \$${amount.toStringAsFixed(2)}.';
+        errorMsg = 'Exact amounts add up to ${context.currencySymbol}${totalSplit.toStringAsFixed(2)}, but total is ${context.currencySymbol}${amount.toStringAsFixed(2)}.';
       }
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -210,7 +211,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
          if (_includedMembers.contains(userId)) currentTotal += amt;
       });
       maxTarget = totalAmount;
-      symbol = '\$';
+      symbol = context.currencySymbol;
     }
 
     double diff = currentTotal - maxTarget;
@@ -219,17 +220,17 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
     
     String mainText = _splitType == 'percentage'
         ? '${currentTotal.toStringAsFixed(0)}% of 100%'
-        : '\$${currentTotal.toStringAsFixed(2)} of \$${maxTarget.toStringAsFixed(2)}';
+        : '${context.currencySymbol}${currentTotal.toStringAsFixed(2)} of ${context.currencySymbol}${maxTarget.toStringAsFixed(2)}';
     
     String subText = '';
     if (isOver) {
       subText = _splitType == 'percentage' 
           ? '${diff.toStringAsFixed(0)}% over' 
-          : '\$${diff.toStringAsFixed(2)} over';
+          : '${context.currencySymbol}${diff.toStringAsFixed(2)} over';
     } else if (isUnder) {
       subText = _splitType == 'percentage' 
           ? '${diff.abs().toStringAsFixed(0)}% left' 
-          : '\$${diff.abs().toStringAsFixed(2)} left';
+          : '${context.currencySymbol}${diff.abs().toStringAsFixed(2)} left';
     } else {
       subText = 'Perfectly split!';
     }
@@ -247,7 +248,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
         children: [
           Text(
             mainText,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppConstants.textPrimary),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppConstants.textPrimary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -311,7 +312,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppConstants.cardColor,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -323,9 +324,9 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                       ),
                       child: Column(
                         children: [
-                          const Text(
+                          Text(
                             'Enter Amount',
-                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                            style: TextStyle(color: AppConstants.textSecondary, fontSize: 16),
                           ),
                           const SizedBox(height: 8),
                           TextField(
@@ -334,16 +335,16 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                               decimal: true,
                             ),
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,
                               color: AppConstants.primaryColor,
                             ),
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: '0.00',
                               border: InputBorder.none,
-                              hintStyle: TextStyle(color: Colors.grey),
-                              prefixText: '\$',
+                              hintStyle: TextStyle(color: AppConstants.textHint),
+                              prefixText: context.currencySymbol,
                               prefixStyle: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.bold,
@@ -361,7 +362,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                     const SizedBox(height: 24),
 
                     // Details Form
-                    const Text(
+                    Text(
                       'Details',
                       style: TextStyle(
                         fontSize: 18,
@@ -373,15 +374,17 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppConstants.cardColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
                         children: [
                           TextField(
                             controller: _descriptionController,
+                            style: TextStyle(color: AppConstants.textPrimary),
                             decoration: InputDecoration(
                               labelText: 'What is this for?',
+                              labelStyle: TextStyle(color: AppConstants.textSecondary),
                               prefixIcon: const Icon(
                                 Icons.description_outlined,
                                 color: AppConstants.primaryColor,
@@ -398,8 +401,10 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                           const SizedBox(height: 16),
                           TextField(
                             controller: _categoryController,
+                            style: TextStyle(color: AppConstants.textPrimary),
                             decoration: InputDecoration(
                               labelText: 'Category (e.g., Food, Travel)',
+                              labelStyle: TextStyle(color: AppConstants.textSecondary),
                               prefixIcon: const Icon(
                                 Icons.category_outlined,
                                 color: AppConstants.primaryColor,
@@ -423,7 +428,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Split With',
                           style: TextStyle(
                             fontSize: 18,
@@ -441,28 +446,29 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                             vertical: 4,
                           ),
                           child: DropdownButton<String>(
+                            dropdownColor: AppConstants.cardColor,
                             value: _splitType,
                             underline: const SizedBox(),
                             icon: const Icon(
                               Icons.keyboard_arrow_down,
                               color: AppConstants.primaryColor,
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppConstants.primaryColor,
                               fontWeight: FontWeight.bold,
                             ),
-                            items: const [
+                            items: [
                               DropdownMenuItem(
                                 value: 'equal',
-                                child: Text('Split Equally'),
+                                child: Text('Split Equally', style: TextStyle(color: AppConstants.textPrimary)),
                               ),
                               DropdownMenuItem(
                                 value: 'exact',
-                                child: Text('Exact Amount'),
+                                child: Text('Exact Amount', style: TextStyle(color: AppConstants.textPrimary)),
                               ),
                               DropdownMenuItem(
                                 value: 'percentage',
-                                child: Text('By Percentage'),
+                                child: Text('By Percentage', style: TextStyle(color: AppConstants.textPrimary)),
                               ),
                             ],
                             onChanged: (val) {
@@ -486,7 +492,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppConstants.cardColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -500,8 +506,8 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                           Widget? subtitleWidget;
                           if (_splitType == 'percentage' && isIncluded) {
                              subtitleWidget = Text(
-                               '\$${splitAmount.toStringAsFixed(2)}',
-                               style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                               '${context.currencySymbol}${splitAmount.toStringAsFixed(2)}',
+                               style: TextStyle(color: AppConstants.textSecondary, fontSize: 13),
                              );
                           }
 
@@ -519,10 +525,10 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                                     CircleAvatar(
                                       backgroundColor: isMe
                                           ? AppConstants.primaryColor
-                                          : Colors.grey[200],
+                                          : (AppConstants.isDark ? Colors.grey[800] : Colors.grey[200]),
                                       foregroundColor: isMe
                                           ? Colors.white
-                                          : Colors.grey[700],
+                                          : (AppConstants.isDark ? Colors.grey[300] : Colors.grey[700]),
                                       child: Text(
                                         isMe ? 'You' : userId.substring(0, 1).toUpperCase(),
                                       ),
@@ -534,7 +540,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600, 
                                     decoration: isIncluded ? TextDecoration.none : TextDecoration.lineThrough,
-                                    color: isIncluded ? AppConstants.textPrimary : Colors.grey,
+                                    color: isIncluded ? AppConstants.textPrimary : (AppConstants.isDark ? Colors.grey[600]! : Colors.grey),
                                   ),
                                 ),
                                 subtitle: subtitleWidget,
@@ -551,11 +557,11 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Text(
-                                            '\$${splitAmount.toStringAsFixed(2)}',
+                                            '${context.currencySymbol}${splitAmount.toStringAsFixed(2)}',
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              color: isIncluded ? AppConstants.textPrimary : Colors.grey,
+                                              color: isIncluded ? AppConstants.textPrimary : (AppConstants.isDark ? Colors.grey[600]! : Colors.grey),
                                             ),
                                           ),
                                         )
@@ -564,10 +570,16 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                                               controller: _percentControllers[userId],
                                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                               textAlign: TextAlign.center,
+                                              style: TextStyle(color: AppConstants.textPrimary),
                                               decoration: InputDecoration(
                                                 suffixText: '%',
+                                                suffixStyle: TextStyle(color: AppConstants.textSecondary),
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide(color: AppConstants.isDark ? Colors.grey[700]! : Colors.grey[300]!),
+                                                ),
                                               ),
                                               onChanged: (val) {
                                                 _splitPercentages[userId] = double.tryParse(val) ?? 0;
@@ -579,10 +591,16 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                                               controller: _exactControllers[userId],
                                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                               textAlign: TextAlign.center,
+                                              style: TextStyle(color: AppConstants.textPrimary),
                                               decoration: InputDecoration(
-                                                prefixText: '\$',
+                                                prefixText: context.currencySymbol,
+                                                prefixStyle: TextStyle(color: AppConstants.textSecondary),
                                                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  borderSide: BorderSide(color: AppConstants.isDark ? Colors.grey[700]! : Colors.grey[300]!),
+                                                ),
                                               ),
                                               onChanged: (val) {
                                                 setState(() {
