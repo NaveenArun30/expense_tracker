@@ -21,6 +21,7 @@ import '../../../core/currency_bloc/currency_cubit.dart';
 import '../../../core/budget_bloc/budget_cubit.dart';
 import '../../../core/budget_bloc/budget_state.dart';
 import '../../../model/expense_model.dart';
+import '../../../core/theme_bloc/theme_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,6 +40,21 @@ class _HomeScreenState extends State<HomeScreen>
   String _dateFilterLabel = DateFormat.MMM().format(DateTime.now());
   DateTime? _selectedMonth = DateTime.now();
   DateTimeRange? _selectedDateRange;
+
+  void _loadExpensesForCurrentFilter() {
+    if (_selectedMonth != null) {
+      context.read<ExpenseBloc>().add(LoadExpenses(month: _selectedMonth));
+    } else if (_selectedDateRange != null) {
+      context.read<ExpenseBloc>().add(
+        LoadExpensesByDateRange(
+          startDate: _selectedDateRange!.start,
+          endDate: _selectedDateRange!.end,
+        ),
+      );
+    } else {
+      context.read<ExpenseBloc>().add(LoadExpenses());
+    }
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -84,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    context.watch<ThemeBloc>();
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -1012,15 +1029,20 @@ class _HomeScreenState extends State<HomeScreen>
               'Detailed history',
               Icons.receipt_long_rounded,
               const Color(0xFF3F8CFF),
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ExpenseLogScreen(
-                    selectedMonth: _selectedMonth,
-                    selectedDateRange: _selectedDateRange,
+              () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ExpenseLogScreen(
+                      selectedMonth: _selectedMonth,
+                      selectedDateRange: _selectedDateRange,
+                    ),
                   ),
-                ),
-              ),
+                );
+                if (context.mounted) {
+                  _loadExpensesForCurrentFilter();
+                }
+              },
             ),
           ),
           const SizedBox(width: 12),
@@ -1030,12 +1052,17 @@ class _HomeScreenState extends State<HomeScreen>
               'Spending insights',
               Icons.pie_chart_rounded,
               const Color(0xFFFF565E),
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AnalyticsScreen(),
-                ),
-              ),
+              () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AnalyticsScreen(),
+                  ),
+                );
+                if (context.mounted) {
+                  _loadExpensesForCurrentFilter();
+                }
+              },
             ),
           ),
         ],
@@ -1137,70 +1164,71 @@ class _HomeScreenState extends State<HomeScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        decoration: BoxDecoration(
-          color: AppConstants.cardColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8, bottom: 16),
-              child: Text(
-                'Filter Transactions',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppConstants.textPrimary,
+      builder: (modalContext) => Material(
+        color: AppConstants.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 16),
+                child: Text(
+                  'Filter Transactions',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppConstants.textPrimary,
+                  ),
                 ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.calendar_month,
-                color: Color(0xFF8B5CF6),
+              ListTile(
+                leading: const Icon(
+                  Icons.calendar_month,
+                  color: Color(0xFF8B5CF6),
+                ),
+                title: Text(
+                  'By Month',
+                  style: TextStyle(color: AppConstants.textPrimary),
+                ),
+                onTap: () {
+                  Navigator.pop(modalContext);
+                  final state = context.read<ExpenseBloc>().state;
+                  DateTime initial = DateTime.now();
+                  if (state is ExpenseLoaded) initial = state.currentMonth;
+                  _showMonthPicker(context, initial);
+                },
               ),
-              title: Text(
-                'By Month',
-                style: TextStyle(color: AppConstants.textPrimary),
+              ListTile(
+                leading: const Icon(
+                  Icons.calendar_today,
+                  color: Color(0xFF8B5CF6),
+                ),
+                title: Text(
+                  'By Year',
+                  style: TextStyle(color: AppConstants.textPrimary),
+                ),
+                onTap: () {
+                  Navigator.pop(modalContext);
+                  _showYearPicker(context);
+                },
               ),
-              onTap: () {
-                Navigator.pop(modalContext);
-                final state = context.read<ExpenseBloc>().state;
-                DateTime initial = DateTime.now();
-                if (state is ExpenseLoaded) initial = state.currentMonth;
-                _showMonthPicker(context, initial);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.calendar_today,
-                color: Color(0xFF8B5CF6),
+              ListTile(
+                leading: const Icon(Icons.date_range, color: Color(0xFF8B5CF6)),
+                title: Text(
+                  'Custom Range',
+                  style: TextStyle(color: AppConstants.textPrimary),
+                ),
+                onTap: () {
+                  Navigator.pop(modalContext);
+                  _showCustomDateRangePicker(context);
+                },
               ),
-              title: Text(
-                'By Year',
-                style: TextStyle(color: AppConstants.textPrimary),
-              ),
-              onTap: () {
-                Navigator.pop(modalContext);
-                _showYearPicker(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.date_range, color: Color(0xFF8B5CF6)),
-              title: Text(
-                'Custom Range',
-                style: TextStyle(color: AppConstants.textPrimary),
-              ),
-              onTap: () {
-                Navigator.pop(modalContext);
-                _showCustomDateRangePicker(context);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1301,6 +1329,7 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
       child: FloatingActionButton(
+        heroTag: 'home_add_expense_fab',
         onPressed: () async {
           final result = await Navigator.push(
             context,
@@ -1325,7 +1354,7 @@ class _HomeScreenState extends State<HomeScreen>
           );
 
           if (result == true && mounted) {
-            context.read<ExpenseBloc>().add(RefreshExpenses());
+            _loadExpensesForCurrentFilter();
           }
         },
         backgroundColor: Colors.transparent,

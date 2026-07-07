@@ -151,7 +151,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
         });
         errorMsg = 'Percentages add up to ${totalPct.toStringAsFixed(1)}%, they must equal 100%.';
       } else if (_splitType == 'exact') {
-        errorMsg = 'Exact amounts add up to ${context.currencySymbol}${totalSplit.toStringAsFixed(2)}, but total is ${context.currencySymbol}${amount.toStringAsFixed(2)}.';
+        errorMsg = 'Exact amounts add up to ${context.readCurrencySymbol}${totalSplit.toStringAsFixed(2)}, but total is ${context.readCurrencySymbol}${amount.toStringAsFixed(2)}.';
       }
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -492,11 +492,14 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                     const SizedBox(height: 12),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppConstants.cardColor,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Column(
-                        children: _members.map((member) {
+                      child: Material(
+                        color: AppConstants.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: _members.map((member) {
                           final userId = member.userId;
                           final isMe = userId == Supabase.instance.client.auth.currentUser?.id;
                           final isIncluded = _includedMembers.contains(userId);
@@ -616,6 +619,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                           );
                         }).toList(),
                       ),
+                    ),
                     ),
                     
                     _buildSummaryFooter(totalAmount),

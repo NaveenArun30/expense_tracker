@@ -196,11 +196,11 @@ class PdfExportHelper {
     final fileName =
         'Expense_Statement_${DateFormat('yyyyMMdd').format(DateTime.now())}';
 
-    final resultPath = await FileSaver.instance.saveFile(
+    final resultPath = await FileSaver.instance.saveAs(
       name: fileName,
       bytes: bytes,
-      mimeType: MimeType.pdf,
       fileExtension: 'pdf',
+      mimeType: MimeType.pdf,
     );
 
     return resultPath;

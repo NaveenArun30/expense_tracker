@@ -56,7 +56,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
         content: Text(
           currentlyPaid
               ? 'Are you sure you want to mark this payment as pending?'
-              : 'Confirm that this person has paid their share of ${context.currencySymbol}${split.amount.toStringAsFixed(2)}?',
+              : 'Confirm that this person has paid their share of ${context.readCurrencySymbol}${split.amount.toStringAsFixed(2)}?',
           style: TextStyle(color: AppConstants.textSecondary),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -615,7 +615,6 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
-        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isPaid
@@ -631,7 +630,11 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
           ),
         ],
       ),
-      child: ListTile(
+      child: Material(
+        color: AppConstants.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           width: 50,
@@ -678,12 +681,15 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
         ),
         title: Row(
           children: [
-            Text(
-              isMe ? 'You' : 'Member ${split.userId.substring(0, 6)}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppConstants.textPrimary,
+            Flexible(
+              child: Text(
+                isMe ? 'You' : 'Member ${split.userId.substring(0, 6)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppConstants.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (isMe) ...[
@@ -719,6 +725,7 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
           ),
         ),
         trailing: _buildStatusAction(split, isPayer, isMe, isPaid, context),
+      ),
       ),
     );
   }

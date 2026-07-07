@@ -5,6 +5,7 @@ import '../bloc/shared_bloc.dart';
 import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
 import 'group_detail_screen.dart';
+import '../../../core/theme_bloc/theme_bloc.dart';
 
 class SharedDashboardScreen extends StatefulWidget {
   const SharedDashboardScreen({super.key});
@@ -262,6 +263,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<ThemeBloc>();
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(

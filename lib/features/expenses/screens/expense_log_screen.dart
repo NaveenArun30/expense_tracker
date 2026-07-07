@@ -11,6 +11,7 @@ import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
 import '../../../utils/pdf_export_helper.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import 'package:open_filex/open_filex.dart';
 
 class ExpenseLogScreen extends StatefulWidget {
   final DateTime? selectedMonth;
@@ -60,7 +61,9 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
 
   void _loadInitialExpenses() {
     if (widget.selectedMonth != null) {
-      context.read<ExpenseBloc>().add(LoadExpenses(month: widget.selectedMonth));
+      context.read<ExpenseBloc>().add(
+        LoadExpenses(month: widget.selectedMonth),
+      );
     } else if (widget.selectedDateRange != null) {
       context.read<ExpenseBloc>().add(
         LoadExpensesByDateRange(
@@ -80,8 +83,10 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
       if (state is ExpenseLoaded) {
         if (_visibleExpensesCount < state.expenses.length) {
           setState(() {
-            _visibleExpensesCount =
-                (_visibleExpensesCount + 20).clamp(0, state.expenses.length);
+            _visibleExpensesCount = (_visibleExpensesCount + 20).clamp(
+              0,
+              state.expenses.length,
+            );
           });
         }
       }
@@ -169,11 +174,15 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
               ),
               if (state is ExpenseLoaded && state.expenses.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.download, color: AppConstants.primaryColor),
+                  icon: const Icon(
+                    Icons.download,
+                    color: AppConstants.primaryColor,
+                  ),
                   tooltip: 'Download Statement',
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: () => _showDownloadConfirmationDialog(context, state),
+                  onPressed: () =>
+                      _showDownloadConfirmationDialog(context, state),
                 ),
             ],
           ),
@@ -211,7 +220,9 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
                       child: Text(
                         filter,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : AppConstants.textSecondary,
+                          color: isSelected
+                              ? Colors.white
+                              : AppConstants.textSecondary,
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
@@ -393,7 +404,9 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         );
       }
 
-      final visibleExpenses = state.expenses.take(_visibleExpensesCount).toList();
+      final visibleExpenses = state.expenses
+          .take(_visibleExpensesCount)
+          .toList();
 
       // Group expenses by date
       Map<String, List<ExpenseModel>> groupedExpenses = {};
@@ -545,7 +558,6 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -555,71 +567,79 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: categoryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(categoryIcon, color: categoryColor, size: 24),
-        ),
-        title: Text(
-          expense.title,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: AppConstants.textPrimary,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              expense.category,
-              style: TextStyle(
-                color: categoryColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+      child: Material(
+        color: AppConstants.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(16),
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: categoryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            if (expense.description != null &&
-                expense.description!.isNotEmpty) ...[
-              const SizedBox(height: 2),
+            child: Icon(categoryIcon, color: categoryColor, size: 24),
+          ),
+          title: Text(
+            expense.title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: AppConstants.textPrimary,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
               Text(
-                expense.description!,
-                style: TextStyle(color: AppConstants.textSecondary, fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                expense.category,
+                style: TextStyle(
+                  color: categoryColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (expense.description != null &&
+                  expense.description!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  expense.description!,
+                  style: TextStyle(
+                    color: AppConstants.textSecondary,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 4),
+              Text(
+                DateFormat.jm().format(expense.date),
+                style: TextStyle(color: Colors.grey[500], fontSize: 11),
               ),
             ],
-            const SizedBox(height: 4),
-            Text(
-              DateFormat.jm().format(expense.date),
-              style: TextStyle(color: Colors.grey[500], fontSize: 11),
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppConstants.textPrimary,
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppConstants.textPrimary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          onTap: () {
+            _showExpenseDetails(context, expense);
+          },
         ),
-        onTap: () {
-          _showExpenseDetails(context, expense);
-        },
       ),
     );
   }
@@ -748,12 +768,17 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
     return _selectedFilter;
   }
 
-  Future<void> _showDownloadConfirmationDialog(BuildContext context, ExpenseLoaded state) async {
+  Future<void> _showDownloadConfirmationDialog(
+    BuildContext context,
+    ExpenseLoaded state,
+  ) async {
     final shouldDownload = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Download Statement'),
-        content: const Text('Would you like to download the expense statement as a PDF? It will be saved directly to your device.'),
+        content: const Text(
+          'Would you like to download the expense statement as a PDF? It will be saved directly to your device.',
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
@@ -765,7 +790,9 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppConstants.primaryColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             child: const Text('Download'),
           ),
@@ -779,15 +806,33 @@ class _ExpenseLogScreenState extends State<ExpenseLogScreen> {
         final filePath = await PdfExportHelper.generateExpenseReport(
           state.expenses,
           dateRangeStr,
-          currencySymbol: context.currencySymbol,
+          currencySymbol: context.readCurrencySymbol,
         );
-        
+
         if (context.mounted && filePath != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Saved successfully to: $filePath'),
+              content: const Text('Downloaded successfully'),
               backgroundColor: Colors.green,
-              duration: const Duration(seconds: 4),
+              duration: const Duration(seconds: 5),
+              // action: SnackBarAction(
+              //   label: 'Open',
+              //   textColor: Colors.white,
+              //   onPressed: () async {
+              //     try {
+              //       await OpenFilex.open(filePath);
+              //     } catch (e) {
+              //       if (context.mounted) {
+              //         ScaffoldMessenger.of(context).showSnackBar(
+              //           SnackBar(
+              //             content: Text('Could not open file: $e'),
+              //             backgroundColor: Colors.red,
+              //           ),
+              //         );
+              //       }
+              //     }
+              //   },
+              // ),
             ),
           );
         }

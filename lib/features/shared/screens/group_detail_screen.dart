@@ -135,7 +135,6 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: AppConstants.cardColor,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -145,59 +144,64 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                   ),
                                 ],
                               ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.all(16),
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      (AppConstants.categoryColors[expense
-                                                  .category] ??
-                                              Colors.blue)
-                                          .withOpacity(0.1),
-                                  child: Icon(
-                                    AppConstants.categoryIcons[expense
-                                            .category] ??
-                                        Icons.receipt_long,
-                                    color:
-                                        AppConstants.categoryColors[expense
-                                            .category] ??
-                                        Colors.blue,
+                              child: Material(
+                                color: AppConstants.cardColor,
+                                borderRadius: BorderRadius.circular(12),
+                                clipBehavior: Clip.antiAlias,
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.all(16),
+                                  leading: CircleAvatar(
+                                    backgroundColor:
+                                        (AppConstants.categoryColors[expense
+                                                    .category] ??
+                                                Colors.blue)
+                                            .withOpacity(0.1),
+                                    child: Icon(
+                                      AppConstants.categoryIcons[expense
+                                              .category] ??
+                                          Icons.receipt_long,
+                                      color:
+                                          AppConstants.categoryColors[expense
+                                              .category] ??
+                                          Colors.blue,
+                                    ),
                                   ),
-                                ),
-                                title: Text(
-                                  expense.description,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppConstants.textPrimary,
+                                  title: Text(
+                                    expense.description,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppConstants.textPrimary,
+                                    ),
                                   ),
-                                ),
-                                subtitle: Text(
-                                  'Paid by ${expense.paidBy.substring(0, 4)}... \n${DateFormat.yMMMd().format(expense.date)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppConstants.textSecondary,
+                                  subtitle: Text(
+                                    'Paid by ${expense.paidBy.substring(0, 4)}... \n${DateFormat.yMMMd().format(expense.date)}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppConstants.textSecondary,
+                                    ),
                                   ),
-                                ),
-                                trailing: Text(
-                                  '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: AppConstants.textPrimary,
+                                  trailing: Text(
+                                    '${context.currencySymbol}${expense.amount.toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: AppConstants.textPrimary,
+                                    ),
                                   ),
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => BlocProvider.value(
-                                        value: context.read<SharedBloc>(),
-                                        child: SharedExpenseDetailScreen(
-                                          expenseId: expense.id,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider.value(
+                                          value: context.read<SharedBloc>(),
+                                          child: SharedExpenseDetailScreen(
+                                            expenseId: expense.id,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             );
                           },
@@ -212,6 +216,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'group_detail_add_expense_fab',
         onPressed: () {
           Navigator.push(
             context,

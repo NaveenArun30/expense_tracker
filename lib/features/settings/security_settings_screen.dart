@@ -99,11 +99,14 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: AppConstants.cardColor,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Column(
-                children: [
+              child: Material(
+                color: AppConstants.cardColor,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
                   ListTile(
                     title: const Text('PIN Protection'),
                     subtitle: Text(_hasPin ? 'PIN is set' : 'Not configured'),
@@ -152,6 +155,7 @@ class _SecuritySettingsScreenState extends State<SecuritySettingsScreen> {
                       ),
                     ),
                 ],
+              ),
               ),
             ),
           ],
