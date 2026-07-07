@@ -163,6 +163,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   const SizedBox(width: 8),
                   FloatingActionButton(
                     mini: true,
+                    heroTag: 'ai_send_message_fab',
                     onPressed: _sendMessage,
                     backgroundColor: AppConstants.primaryColor,
                     child: const Icon(Icons.send, color: Colors.white),

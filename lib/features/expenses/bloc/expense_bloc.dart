@@ -144,6 +144,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
           totalAmount: totalAmount,
           categoryTotals: categoryTotals,
           currentMonth: event.startDate,
+          startDate: event.startDate,
+          endDate: event.endDate,
         ),
       );
     } catch (e) {
@@ -294,7 +296,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         }
       }
 
-      add(LoadExpenses()); // Refresh expenses
+      add(RefreshExpenses()); // Refresh expenses
     } catch (e) {
       emit(ExpenseError('Failed to add expense: $e'));
     }
@@ -317,7 +319,15 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     Emitter<ExpenseState> emit,
   ) async {
     if (state is ExpenseLoaded) {
-      add(LoadExpenses(month: (state as ExpenseLoaded).currentMonth));
+      final loadedState = state as ExpenseLoaded;
+      if (loadedState.startDate != null && loadedState.endDate != null) {
+        add(LoadExpensesByDateRange(
+          startDate: loadedState.startDate!,
+          endDate: loadedState.endDate!,
+        ));
+      } else {
+        add(LoadExpenses(month: loadedState.currentMonth));
+      }
     } else {
       add(LoadExpenses());
     }

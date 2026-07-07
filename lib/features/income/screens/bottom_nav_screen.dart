@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/theme_bloc/theme_bloc.dart';
 import '../../expenses/bloc/expense_bloc.dart';
 import '../../expenses/bloc/expense_event.dart';
 import '../../settings/settings_screen.dart';
@@ -76,11 +77,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       context,
       MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
     );
-    if (mounted) context.read<ExpenseBloc>().add(LoadExpenses());
+    if (mounted) context.read<ExpenseBloc>().add(RefreshExpenses());
   }
 
   @override
   Widget build(BuildContext context) {
+    context.watch<ThemeBloc>();
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       body: IndexedStack(index: _currentPage, children: _screens),

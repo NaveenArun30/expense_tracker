@@ -9,6 +9,7 @@ import '../bloc/income_state.dart';
 import 'add_account_screen.dart';
 import 'add_income_screen.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import '../../../core/theme_bloc/theme_bloc.dart';
 
 class IncomeScreen extends StatefulWidget {
   const IncomeScreen({super.key});
@@ -50,6 +51,7 @@ class _IncomeScreenState extends State<IncomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    context.watch<ThemeBloc>();
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(
@@ -570,7 +572,6 @@ class _IncomeScreenState extends State<IncomeScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppConstants.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -580,66 +581,71 @@ class _IncomeScreenState extends State<IncomeScreen>
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: sourceColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(sourceIcon, color: sourceColor, size: 24),
-        ),
-        title: Text(
-          income.accountName,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: AppConstants.textPrimary,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              income.source,
-              style: TextStyle(
-                color: sourceColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+      child: Material(
+        color: AppConstants.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(16),
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: sourceColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            if (income.description != null && income.description!.isNotEmpty) ...[
-              const SizedBox(height: 2),
+            child: Icon(sourceIcon, color: sourceColor, size: 24),
+          ),
+          title: Text(
+            income.accountName,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: AppConstants.textPrimary,
+            ),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
               Text(
-                income.description!,
-                style: TextStyle(color: AppConstants.textSecondary, fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                income.source,
+                style: TextStyle(
+                  color: sourceColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (income.description != null && income.description!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  income.description!,
+                  style: TextStyle(color: AppConstants.textSecondary, fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 4),
+              Text(
+                DateFormat.yMMMd().add_jm().format(income.date),
+                style: TextStyle(color: Colors.grey[500], fontSize: 11),
               ),
             ],
-            const SizedBox(height: 4),
-            Text(
-              DateFormat.yMMMd().add_jm().format(income.date),
-              style: TextStyle(color: Colors.grey[500], fontSize: 11),
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '+${context.currencySymbol}${income.amount.toStringAsFixed(2)}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppConstants.successColor,
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '+${context.currencySymbol}${income.amount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppConstants.successColor,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -651,6 +657,7 @@ class _IncomeScreenState extends State<IncomeScreen>
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         FloatingActionButton.extended(
+          heroTag: 'income_add_income_fab',
           onPressed: () async {
             final result = await Navigator.push(
               context,

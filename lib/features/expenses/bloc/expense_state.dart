@@ -13,6 +13,8 @@ class ExpenseLoaded extends ExpenseState {
   final double totalAmount;
   final Map<String, double> categoryTotals;
   final DateTime currentMonth;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   ExpenseLoaded({
     required this.expenses,
@@ -20,6 +22,8 @@ class ExpenseLoaded extends ExpenseState {
     required this.totalAmount,
     required this.categoryTotals,
     required this.currentMonth,
+    this.startDate,
+    this.endDate,
   });
 }
 

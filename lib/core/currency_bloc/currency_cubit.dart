@@ -34,4 +34,7 @@ extension CurrencyContext on BuildContext {
   Currency get currency => watch<CurrencyCubit>().state.selectedCurrency;
   String get currencySymbol => currency.symbol;
   String get currencyCode => currency.code;
+
+  Currency get readCurrency => read<CurrencyCubit>().state.selectedCurrency;
+  String get readCurrencySymbol => readCurrency.symbol;
 }
