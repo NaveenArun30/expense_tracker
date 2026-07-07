@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../services/ai_service.dart';
 import '../../../services/preferences_service.dart';
+import '../../../services/supabase_service.dart';
 import 'ai_event.dart';
 import 'ai_state.dart';
 
@@ -50,8 +52,6 @@ class AiBloc extends Bloc<AiEvent, AiState> {
     SendChatMessage event,
     Emitter<AiState> emit,
   ) async {
-    // Note: Chat logic might need a separate state or stream handling for real-time.
-    // For now, we'll keep it simple request-response.
     emit(AiLoading());
     try {
       final apiKey = await _preferencesService.getGeminiApiKey();
@@ -60,12 +60,24 @@ class AiBloc extends Bloc<AiEvent, AiState> {
         return;
       }
 
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null || userId.isEmpty) {
+        emit(const AiError('User not authenticated. Please log in.'));
+        return;
+      }
+
+      // Fetch all real-time transaction data and accounts from database
+      final expenses = await SupabaseService.getAllExpenses(userId: userId);
+      final income = await SupabaseService.getAllIncome(userId: userId);
+      final accounts = await SupabaseService.getAccounts(userId: userId);
+
       // We collect the full response string for simplicity in this iteration
       final stream = _aiService.chatWithAi(
         apiKey: apiKey,
         message: event.message,
-        expenses: event.expenses,
-        income: event.income,
+        expenses: expenses,
+        income: income,
+        accounts: accounts,
         history: _chatHistory,
       );
 

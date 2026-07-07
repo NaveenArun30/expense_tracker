@@ -58,6 +58,7 @@ Format the response in Markdown.
     required String message,
     required List<ExpenseModel> expenses,
     required List<IncomeModel> income,
+    required List<AccountModel> accounts,
     required List<Content> history,
   }) async* {
     if (apiKey.isEmpty) {
@@ -65,23 +66,61 @@ Format the response in Markdown.
     }
 
     try {
+      final accountMap = <String, String>{};
+      for (var a in accounts) {
+        if (a.id != null) {
+          accountMap[a.id!] = a.accountName;
+        }
+      }
+
+      // Format accounts info
+      final accountsStr = accounts.isEmpty
+          ? 'No accounts found.'
+          : accounts.map((a) => '- Account: ${a.accountName}, Balance: \$${a.balance.toStringAsFixed(2)}').join('\n');
+
+      // Format income info
+      final incomeStr = income.isEmpty
+          ? 'No income records found.'
+          : income.map((i) => '- Source: ${i.source}, Amount: \$${i.amount.toStringAsFixed(2)}, Date: ${i.date.toIso8601String().split('T')[0]}, Account: ${i.accountName}, Description: ${i.description ?? "None"}').join('\n');
+
+      // Format expense info
+      final expensesStr = expenses.isEmpty
+          ? 'No expense records found.'
+          : expenses.map((e) {
+              final accountName = accountMap[e.accountId] ?? 'Unknown';
+              return '- Title: ${e.title}, Amount: \$${e.amount.toStringAsFixed(2)}, Category: ${e.category}, Date: ${e.date.toIso8601String().split('T')[0]}, Account: $accountName, Description: ${e.description ?? "None"}';
+            }).join('\n');
+
+      final systemPrompt = '''
+You are a helpful, professional, and friendly personal financial assistant.
+You have access to the user's real-time financial database.
+
+Current Database State:
+1. Accounts:
+$accountsStr
+
+2. Income Records:
+$incomeStr
+
+3. Expense Records:
+$expensesStr
+
+Guidelines for responding:
+- Only answer using the transactions and accounts present in the database.
+- If the user asks about a transaction, category, or account that does not exist in the database, clearly state: "I couldn't find any record of that in your database." and offer to help them look for something else or guide them on how to add it. Do NOT make up or assume any transactions.
+- Keep your answers concise, accurate, and format them nicely in Markdown.
+- If asked for general advice or explanations (e.g., "how can I save money?"), you can answer using your general knowledge, but reference their actual database records where relevant.
+- Current date and time: ${DateTime.now().toLocal()}. Use this to reason about "this month", "last week", "yesterday", etc.
+''';
+
       final model = GenerativeModel(
         model: 'gemini-flash-latest',
         apiKey: apiKey,
+        systemInstruction: Content.system(systemPrompt),
       );
 
       final chat = model.startChat(history: history);
-
-      final contextPrompt =
-          '''
-Context - User's Financial Data:
-Expenses: ${expenses.length} transactions.
-Income: ${income.length} transactions.
-
-User Message: $message
-''';
-
-      final response = chat.sendMessageStream(Content.text(contextPrompt));
+      final response = chat.sendMessageStream(Content.text(message));
 
       await for (final chunk in response) {
         if (chunk.text != null) {

@@ -22,42 +22,42 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppConstants.backgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Settings',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppConstants.textOnPrimary,
-          ),
-        ),
-        backgroundColor: AppConstants.primaryColor,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppConstants.textOnPrimary),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: AppConstants.primaryGradient,
+    return BlocBuilder<ThemeBloc, ThemeState>(
+      builder: (context, themeState) {
+        return Scaffold(
+          backgroundColor: AppConstants.backgroundColor,
+          appBar: AppBar(
+            title: const Text(
+              'Settings',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppConstants.textOnPrimary,
+              ),
+            ),
+            backgroundColor: AppConstants.primaryColor,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: AppConstants.textOnPrimary),
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: AppConstants.primaryGradient,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-      body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthInitial) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginScreen()),
-              (route) => false,
-            );
-          }
-        },
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, authState) {
-            return BlocBuilder<ThemeBloc, ThemeState>(
-              builder: (context, themeState) {
+          body: BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthInitial) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -152,10 +152,10 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 );
               },
-            );
-          },
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
   }
 
