@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../income/screens/bottom_nav_screen.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../expenses/screens/home_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -92,11 +91,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-              (route) => false,
-            );
+            context.go('/home');
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -273,7 +268,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          Navigator.pop(context); // Go back to login screen
+                          context.pop(); // Go back to login screen
                         },
                         child: RichText(
                           text: TextSpan(

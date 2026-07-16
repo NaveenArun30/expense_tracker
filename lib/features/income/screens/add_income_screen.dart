@@ -8,6 +8,7 @@ import '../bloc/income_bloc.dart';
 import '../bloc/income_event.dart';
 import '../bloc/income_state.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import 'package:go_router/go_router.dart';
 
 class AddIncomeScreen extends StatefulWidget {
   const AddIncomeScreen({super.key});
@@ -72,7 +73,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
             Icons.arrow_back_ios,
             color: AppConstants.textSecondary,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: Text(
           'Add Income',
@@ -579,7 +580,7 @@ class _AddIncomeScreenState extends State<AddIncomeScreen>
           ),
         );
 
-        Navigator.pop(context, true);
+        context.pop(true);
       }
     }
   }

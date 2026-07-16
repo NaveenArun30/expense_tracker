@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../income/screens/bottom_nav_screen.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../../expenses/screens/home_screen.dart';
-import 'register_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,10 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToRegister() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const RegistrationScreen()),
-    );
+    context.push('/register');
   }
 
   void _navigateToForgotPassword() {
@@ -108,11 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
           
           if (state is AuthAuthenticated) {
             print('LoginScreen - Navigating to HomeScreen');
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-              (route) => false,
-            );
+            context.go('/home');
           } else if (state is AuthError) {
             print('LoginScreen - Showing error: ${state.message}');
             ScaffoldMessenger.of(context).clearSnackBars(); // Clear any existing snackbars

@@ -1,12 +1,11 @@
 import 'package:expense_tracker_app/constants/app_constants.dart';
-// import 'package:expense_tracker_app/features/expenses/screens/analytics_screen.dart';
 import 'package:expense_tracker_app/features/expenses/screens/home_screen.dart';
-import 'package:expense_tracker_app/features/expenses/screens/add_expense_screen.dart';
 import 'package:expense_tracker_app/features/income/screens/income_management.dart';
 import 'package:expense_tracker_app/features/shared/screens/shared_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme_bloc/theme_bloc.dart';
 import '../../expenses/bloc/expense_bloc.dart';
@@ -14,7 +13,9 @@ import '../../expenses/bloc/expense_event.dart';
 import '../../settings/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  final StatefulNavigationShell navigationShell;
+
+  const MainNavigationScreen({super.key, required this.navigationShell});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
@@ -22,17 +23,7 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen>
     with SingleTickerProviderStateMixin {
-  int _currentPage = 0;
   late AnimationController _fabAnimController;
-
-  // Pages: 0=Home, 1=Trends (Analytics), 2=Budget (Income), 3=Profile (Settings)
-  // The center ADD button (nav tap-index 2) pushes a route – it is NOT a page tab.
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const IncomeScreen(),
-    const SharedDashboardScreen(),
-    const SettingsScreen(),
-  ];
 
   @override
   void initState() {
@@ -68,15 +59,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       _openAddExpense();
       return;
     }
-    setState(() => _currentPage = _navIndexToPageIndex(navIndex));
+    widget.navigationShell.goBranch(_navIndexToPageIndex(navIndex));
   }
 
   Future<void> _openAddExpense() async {
     _fabAnimController.forward().then((_) => _fabAnimController.reverse());
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
-    );
+    await context.push('/add-expense');
     if (mounted) context.read<ExpenseBloc>().add(RefreshExpenses());
   }
 
@@ -85,7 +73,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     context.watch<ThemeBloc>();
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
-      body: IndexedStack(index: _currentPage, children: _screens),
+      body: widget.navigationShell,
       bottomNavigationBar: _buildBottomNav(),
     );
   }
@@ -149,7 +137,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     required String label,
   }) {
     final pageIndex = _navIndexToPageIndex(navIndex);
-    final isSelected = _currentPage == pageIndex;
+    final isSelected = widget.navigationShell.currentIndex == pageIndex;
     const accentColor = Color(0xFF8B5CF6);
     final inactiveColor = AppConstants.isDark
         ? Colors.white.withValues(alpha: 0.4)

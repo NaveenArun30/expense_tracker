@@ -1,6 +1,6 @@
 {
-    "name": "expense_tracker_app",
-    "short_name": "expense_tracker_app",
+    "name": "SpenzSnap",
+    "short_name": "SpenzSnap",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

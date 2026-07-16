@@ -11,12 +11,12 @@ import '../bloc/expense_state.dart';
 import '../../ai/bloc/ai_bloc.dart';
 import '../../ai/bloc/ai_event.dart';
 import '../../ai/bloc/ai_state.dart';
-import '../../ai/screens/ai_chat_screen.dart';
 import '../../income/bloc/income_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../income/bloc/income_state.dart';
 import '../../../model/income_model.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import 'package:go_router/go_router.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -71,10 +71,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AiChatScreen()),
-              );
+              context.push('/ai-chat');
             },
           ),
         ],

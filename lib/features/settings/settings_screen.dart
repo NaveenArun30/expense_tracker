@@ -7,15 +7,13 @@ import '../../core/theme_bloc/theme_state.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
 import '../auth/bloc/auth_state.dart';
-import '../auth/screens/login_screen.dart';
 import '../../services/preferences_service.dart';
-import 'security_settings_screen.dart';
 import '../../core/currency_bloc/currency_cubit.dart';
 import '../../core/currency_bloc/currency_state.dart';
 import '../../model/currency_model.dart';
 import '../../core/budget_bloc/budget_cubit.dart';
 import '../../core/budget_bloc/budget_state.dart';
-import 'budget_settings_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -50,10 +48,7 @@ class SettingsScreen extends StatelessWidget {
           body: BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthInitial) {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  (route) => false,
-                );
+                context.go('/login');
               }
             },
             child: BlocBuilder<AuthBloc, AuthState>(
@@ -102,26 +97,14 @@ class SettingsScreen extends StatelessWidget {
                                   'Monthly: $formattedMonthly | Yearly: $formattedYearly',
                                   Icons.wallet,
                                   Colors.purple,
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const BudgetSettingsScreen(),
-                                    ),
-                                  ),
+                                  () => context.push('/budget-settings'),
                                 ),
                                 _buildListTile(
                                   'Security',
                                   'Biometrics & PIN',
                                   Icons.security,
                                   Colors.blue,
-                                  () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const SecuritySettingsScreen(),
-                                    ),
-                                  ),
+                                  () => context.push('/security-settings'),
                                 ),
                               ]);
                             },

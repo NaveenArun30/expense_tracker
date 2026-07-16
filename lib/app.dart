@@ -1,10 +1,10 @@
 import 'package:expense_tracker_app/core/theme_bloc/theme_state.dart'
     show ThemeState;
-import 'package:expense_tracker_app/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme_bloc/theme_bloc.dart';
 import 'constants/app_constants.dart';
+import 'core/routing/app_router.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         // Set the global isDark flag in AppConstants so that color getters resolve correctly.
         AppConstants.isDark = themeState.isDark;
 
-        return MaterialApp(
+        return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           theme: themeState.isDark
               ? ThemeData.dark().copyWith(
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
                   scaffoldBackgroundColor: const Color(0xFFF8F9FA),
                   cardColor: const Color(0xFFFFFFFF),
                 ),
-          home: const SplashScreen(),
+          routerConfig: appRouter,
         );
       },
     );

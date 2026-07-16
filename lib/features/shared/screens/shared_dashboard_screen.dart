@@ -4,8 +4,8 @@ import '../../../constants/app_constants.dart';
 import '../bloc/shared_bloc.dart';
 import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
-import 'group_detail_screen.dart';
 import '../../../core/theme_bloc/theme_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class SharedDashboardScreen extends StatefulWidget {
   const SharedDashboardScreen({super.key});
@@ -631,15 +631,7 @@ class _SharedDashboardScreenState extends State<SharedDashboardScreen> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BlocProvider.value(
-                                    value: context.read<SharedBloc>(),
-                                    child: GroupDetailScreen(groupId: group.id),
-                                  ),
-                                ),
-                              );
+                              context.push('/group-detail/${group.id}');
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(16),

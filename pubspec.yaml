@@ -57,10 +57,23 @@ dependencies:
   file_saver: ^0.3.1
   open_filex: ^4.5.0
   hydrated_bloc: ^11.0.0
+  go_router: ^17.3.0
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/logo.jpg"
+  web:
+    generate: true
+    image_path: "assets/logo.jpg"
+  windows:
+    generate: true
+    image_path: "assets/logo.jpg"
+  macos:
+    generate: true
+    image_path: "assets/logo.jpg"
+  linux:
+    generate: true
+    image_path: "assets/logo.jpg"
 dev_dependencies:
   flutter_test:
     sdk: flutter
