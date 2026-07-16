@@ -6,10 +6,9 @@ import '../../../model/income_model.dart';
 import '../bloc/income_bloc.dart';
 import '../bloc/income_event.dart';
 import '../bloc/income_state.dart';
-import 'add_account_screen.dart';
-import 'add_income_screen.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
 import '../../../core/theme_bloc/theme_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class IncomeScreen extends StatefulWidget {
   const IncomeScreen({super.key});
@@ -253,12 +252,7 @@ class _IncomeScreenState extends State<IncomeScreen>
             ),
             TextButton.icon(
               onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddAccountScreen(),
-                  ),
-                );
+                final result = await context.push('/add-account');
                 if (result == true && mounted) {
                   context.read<IncomeBloc>().add(RefreshIncome());
                 }
@@ -659,12 +653,7 @@ class _IncomeScreenState extends State<IncomeScreen>
         FloatingActionButton.extended(
           heroTag: 'income_add_income_fab',
           onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AddIncomeScreen(),
-              ),
-            );
+            final result = await context.push('/add-income');
             if (result == true && mounted) {
               context.read<IncomeBloc>().add(RefreshIncome());
             }

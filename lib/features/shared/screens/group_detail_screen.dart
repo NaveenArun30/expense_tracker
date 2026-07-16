@@ -5,9 +5,8 @@ import '../../../constants/app_constants.dart';
 import '../bloc/shared_bloc.dart';
 import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
-import 'add_shared_expense_screen.dart';
-import 'shared_expense_detail_screen.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import 'package:go_router/go_router.dart';
 
 class GroupDetailScreen extends StatefulWidget {
   final String groupId;
@@ -189,17 +188,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                     ),
                                   ),
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider.value(
-                                          value: context.read<SharedBloc>(),
-                                          child: SharedExpenseDetailScreen(
-                                            expenseId: expense.id,
-                                          ),
-                                        ),
-                                      ),
-                                    );
+                                      context.push('/shared-expense-detail/${expense.id}');
                                   },
                                 ),
                               ),
@@ -218,15 +207,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'group_detail_add_expense_fab',
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: context.read<SharedBloc>(),
-                child: AddSharedExpenseScreen(groupId: widget.groupId),
-              ),
-            ),
-          );
+          context.push('/group-detail/${widget.groupId}/add-shared-expense');
         },
         backgroundColor: AppConstants.primaryColor,
         child: const Icon(Icons.add, color: Colors.white),

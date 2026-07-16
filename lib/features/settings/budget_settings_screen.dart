@@ -7,6 +7,7 @@ import '../../core/budget_bloc/budget_cubit.dart';
 import '../../core/budget_bloc/budget_state.dart';
 import '../../core/currency_bloc/currency_cubit.dart';
 import '../../core/currency_bloc/currency_state.dart';
+import 'package:go_router/go_router.dart';
 
 class BudgetSettingsScreen extends StatefulWidget {
   const BudgetSettingsScreen({super.key});
@@ -113,7 +114,7 @@ class _BudgetSettingsScreenState extends State<BudgetSettingsScreen>
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
-      Navigator.pop(context);
+      context.pop();
     }
   }
 

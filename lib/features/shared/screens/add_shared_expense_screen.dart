@@ -7,6 +7,7 @@ import '../bloc/shared_event.dart';
 import '../bloc/shared_state.dart';
 import '../models/group_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class AddSharedExpenseScreen extends StatefulWidget {
   final String groupId;
@@ -285,7 +286,7 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                 backgroundColor: AppConstants.successColor,
               ),
             );
-            Navigator.pop(context); // Pop on success!
+            context.pop(); // Pop on success!
           } else if (state is SharedError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

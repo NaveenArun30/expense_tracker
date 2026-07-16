@@ -6,11 +6,8 @@ import 'package:lottie/lottie.dart';
 import 'package:expense_tracker_app/features/auth/bloc/auth_bloc.dart';
 import 'package:expense_tracker_app/features/auth/bloc/auth_state.dart';
 import 'package:expense_tracker_app/features/auth/bloc/auth_event.dart';
-import 'package:expense_tracker_app/features/auth/screens/login_screen.dart';
-import 'package:expense_tracker_app/features/expenses/screens/home_screen.dart';
 import 'package:expense_tracker_app/constants/app_constants.dart';
-
-import 'features/income/screens/bottom_nav_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -114,27 +111,11 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
       final authState = context.read<AuthBloc>().state;
 
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              authState is AuthAuthenticated
-              ? const MainNavigationScreen()
-              : const LoginScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.95, end: 1.0).animate(
-                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
-                ),
-                child: child,
-              ),
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 600),
-        ),
-      );
+      if (authState is AuthAuthenticated) {
+        context.go('/home');
+      } else {
+        context.go('/login');
+      }
     });
   }
 

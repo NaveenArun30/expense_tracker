@@ -15,11 +15,13 @@ import 'features/ai/bloc/ai_bloc.dart';
 import 'services/ai_service.dart';
 import 'services/preferences_service.dart';
 import 'services/security_service.dart';
-import 'features/auth/screens/biometric_auth_screen.dart';
 import 'features/shared/repositories/shared_repository.dart';
 import 'features/shared/bloc/shared_bloc.dart';
+import 'core/routing/app_router.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() async {
+  usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
@@ -105,16 +107,14 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager>
       securityService.updateActivity();
     } else if (state == AppLifecycleState.resumed) {
       if (securityService.shouldLock()) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => BiometricAuthScreen(
-              onAuthenticated: () {
-                securityService.setAuthenticated(true);
-                Navigator.of(context).pop();
-              },
-            ),
-            fullscreenDialog: true,
-          ),
+        appRouter.push(
+          '/biometric-auth',
+          extra: {
+            'onAuthenticated': () {
+              securityService.setAuthenticated(true);
+              appRouter.pop();
+            },
+          },
         );
       }
     }

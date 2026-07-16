@@ -6,6 +6,7 @@ import '../../../model/income_model.dart';
 import '../bloc/income_bloc.dart';
 import '../bloc/income_event.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import 'package:go_router/go_router.dart';
 
 class AddAccountScreen extends StatefulWidget {
   const AddAccountScreen({super.key});
@@ -66,7 +67,7 @@ class _AddAccountScreenState extends State<AddAccountScreen>
             Icons.arrow_back_ios,
             color: AppConstants.textSecondary,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: Text(
           'Add Account',
@@ -308,7 +309,7 @@ class _AddAccountScreenState extends State<AddAccountScreen>
         ),
       );
 
-      Navigator.pop(context, true);
+      context.pop(true);
     }
   }
 }

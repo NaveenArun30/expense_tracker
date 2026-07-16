@@ -22,6 +22,7 @@ import '../../../core/budget_bloc/budget_cubit.dart';
 import '../../../core/budget_bloc/budget_state.dart';
 import '../../../model/expense_model.dart';
 import '../../../core/theme_bloc/theme_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -274,10 +275,7 @@ class _HomeScreenState extends State<HomeScreen>
               size: 20,
             ),
           ),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsScreen()),
-          ),
+          onPressed: () => context.push('/settings'),
         ),
         const SizedBox(width: 16),
       ],
@@ -700,12 +698,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BudgetSettingsScreen(),
-                      ),
-                    );
+                    context.push('/budget-settings');
                   },
                   child: const Text(
                     'Setup',
@@ -1030,14 +1023,12 @@ class _HomeScreenState extends State<HomeScreen>
               Icons.receipt_long_rounded,
               const Color(0xFF3F8CFF),
               () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ExpenseLogScreen(
-                      selectedMonth: _selectedMonth,
-                      selectedDateRange: _selectedDateRange,
-                    ),
-                  ),
+                await context.push(
+                  '/expense-log',
+                  extra: {
+                    'selectedMonth': _selectedMonth,
+                    'selectedDateRange': _selectedDateRange,
+                  },
                 );
                 if (context.mounted) {
                   _loadExpensesForCurrentFilter();
@@ -1053,12 +1044,7 @@ class _HomeScreenState extends State<HomeScreen>
               Icons.pie_chart_rounded,
               const Color(0xFFFF565E),
               () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AnalyticsScreen(),
-                  ),
-                );
+                await context.push('/analytics');
                 if (context.mounted) {
                   _loadExpensesForCurrentFilter();
                 }
@@ -1331,27 +1317,7 @@ class _HomeScreenState extends State<HomeScreen>
       child: FloatingActionButton(
         heroTag: 'home_add_expense_fab',
         onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  const AddExpenseScreen(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                    const begin = Offset(0.0, 1.0);
-                    const end = Offset.zero;
-                    const curve = Curves.easeOutCubic;
-                    var tween = Tween(
-                      begin: begin,
-                      end: end,
-                    ).chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
-            ),
-          );
+          final result = await context.push('/add-expense');
 
           if (result == true && mounted) {
             _loadExpensesForCurrentFilter();
