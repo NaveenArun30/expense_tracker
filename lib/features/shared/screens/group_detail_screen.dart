@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../constants/app_constants.dart';
 import '../bloc/shared_bloc.dart';
 import '../bloc/shared_event.dart';
@@ -173,7 +174,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    'Paid by ${expense.paidBy.substring(0, 4)}... \n${DateFormat.yMMMd().format(expense.date)}',
+                                    'Paid by ${expense.paidBy == Supabase.instance.client.auth.currentUser?.id ? 'You' : (expense.payerName != null && expense.payerName!.isNotEmpty ? expense.payerName! : (expense.paidBy.length >= 4 ? 'Member ${expense.paidBy.substring(0, 4)}' : 'Member ${expense.paidBy}'))} \n${DateFormat.yMMMd().format(expense.date)}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: AppConstants.textSecondary,

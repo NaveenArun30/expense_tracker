@@ -21,12 +21,19 @@ import 'package:expense_tracker_app/features/income/screens/income_management.da
 import 'package:expense_tracker_app/features/shared/screens/shared_dashboard_screen.dart';
 import 'package:expense_tracker_app/features/settings/settings_screen.dart';
 
+import 'package:expense_tracker_app/features/statement_upload/screens/statement_upload_screen.dart';
+
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: [
+    GoRoute(
+      path: '/upload-statement',
+      name: 'upload-statement',
+      builder: (context, state) => const StatementUploadScreen(),
+    ),
     GoRoute(
       path: '/',
       name: 'splash',

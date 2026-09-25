@@ -9,6 +9,8 @@ import '../bloc/expense_bloc.dart';
 import '../bloc/expense_event.dart';
 import '../bloc/expense_state.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
+import '../../income/bloc/income_bloc.dart';
+import '../../income/bloc/income_event.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -721,6 +723,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
       context.read<ExpenseBloc>().add(
         AddExpense(expense, accountId: _selectedAccountId),
       );
+
+      // Refresh income/accounts balance
+      context.read<IncomeBloc>().add(RefreshIncome());
 
       // Show success message with information about account deduction
       final message = _selectedAccountId != null

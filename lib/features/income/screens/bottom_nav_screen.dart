@@ -10,6 +10,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme_bloc/theme_bloc.dart';
 import '../../expenses/bloc/expense_bloc.dart';
 import '../../expenses/bloc/expense_event.dart';
+import '../../income/bloc/income_bloc.dart';
+import '../../income/bloc/income_event.dart';
 import '../../settings/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -60,12 +62,18 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       return;
     }
     widget.navigationShell.goBranch(_navIndexToPageIndex(navIndex));
+    if (navIndex == 1 && mounted) {
+      context.read<IncomeBloc>().add(RefreshIncome());
+    }
   }
 
   Future<void> _openAddExpense() async {
     _fabAnimController.forward().then((_) => _fabAnimController.reverse());
     await context.push('/add-expense');
-    if (mounted) context.read<ExpenseBloc>().add(RefreshExpenses());
+    if (mounted) {
+      context.read<ExpenseBloc>().add(RefreshExpenses());
+      context.read<IncomeBloc>().add(RefreshIncome());
+    }
   }
 
   @override

@@ -8,6 +8,8 @@ import '../bloc/income_event.dart';
 import '../bloc/income_state.dart';
 import '../../../core/currency_bloc/currency_cubit.dart';
 import '../../../core/theme_bloc/theme_bloc.dart';
+import '../../expenses/bloc/expense_bloc.dart';
+import '../../expenses/bloc/expense_state.dart';
 import 'package:go_router/go_router.dart';
 
 class IncomeScreen extends StatefulWidget {
@@ -74,13 +76,19 @@ class _IncomeScreenState extends State<IncomeScreen>
           ),
         ),
       ),
-      body: BlocBuilder<IncomeBloc, IncomeState>(
-        builder: (context, state) {
-          if (state is IncomeLoading) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<ExpenseBloc, ExpenseState>(
+        listener: (context, expenseState) {
+          if (expenseState is ExpenseLoaded) {
+            context.read<IncomeBloc>().add(RefreshIncome());
           }
+        },
+        child: BlocBuilder<IncomeBloc, IncomeState>(
+          builder: (context, state) {
+            if (state is IncomeLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state is IncomeLoaded) {
+            if (state is IncomeLoaded) {
             return AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {
@@ -108,8 +116,9 @@ class _IncomeScreenState extends State<IncomeScreen>
             );
           }
 
-          return const SizedBox.shrink();
-        },
+            return const SizedBox.shrink();
+          },
+        ),
       ),
       floatingActionButton: _buildFABs(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

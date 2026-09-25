@@ -69,9 +69,12 @@ class SettingsScreen extends StatelessWidget {
                         builder: (context, currencyState) {
                           return BlocBuilder<BudgetCubit, BudgetState>(
                             builder: (context, budgetState) {
-                              final currencySymbol = currencyState.selectedCurrency.symbol;
-                              final formattedMonthly = '$currencySymbol${budgetState.monthlyBudget.toStringAsFixed(0)}';
-                              final formattedYearly = '$currencySymbol${budgetState.yearlyBudget.toStringAsFixed(0)}';
+                              final currencySymbol =
+                                  currencyState.selectedCurrency.symbol;
+                              final formattedMonthly =
+                                  '$currencySymbol${budgetState.monthlyBudget.toStringAsFixed(0)}';
+                              final formattedYearly =
+                                  '$currencySymbol${budgetState.yearlyBudget.toStringAsFixed(0)}';
 
                               return _buildSettingsCard([
                                 _buildSwitchTile(
@@ -79,8 +82,9 @@ class SettingsScreen extends StatelessWidget {
                                   'Switch between light and dark theme',
                                   Icons.dark_mode,
                                   themeState.isDark,
-                                  (_) =>
-                                      context.read<ThemeBloc>().add(ToggleTheme()),
+                                  (_) => context.read<ThemeBloc>().add(
+                                    ToggleTheme(),
+                                  ),
                                 ),
                                 _buildListTile(
                                   'Currency',
@@ -105,6 +109,13 @@ class SettingsScreen extends StatelessWidget {
                                   Icons.security,
                                   Colors.blue,
                                   () => context.push('/security-settings'),
+                                ),
+                                _buildListTile(
+                                  'Upload Statement Files',
+                                  'Import credit & debit transactions from PDF/Excel',
+                                  Icons.file_upload,
+                                  Colors.blue,
+                                  () => context.push('/upload-statement'),
                                 ),
                               ]);
                             },
@@ -610,5 +621,4 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
-
 }
