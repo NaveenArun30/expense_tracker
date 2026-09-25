@@ -403,12 +403,19 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
                         ),
                       ),
                       Text(
-                        isPayer ? 'You' : 'Member',
+                        isPayer
+                            ? 'You'
+                            : (expense.payerName != null && expense.payerName!.isNotEmpty
+                                ? expense.payerName!
+                                : (expense.paidBy.length >= 4
+                                    ? 'Member ${expense.paidBy.substring(0, 4)}'
+                                    : 'Member ${expense.paidBy}')),
                         style: TextStyle(
                           color: categoryColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -666,7 +673,11 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
           ),
           child: Center(
             child: Text(
-              isMe ? '👤' : split.userId.substring(0, 2).toUpperCase(),
+              isMe
+                  ? '👤'
+                  : (split.userName != null && split.userName!.isNotEmpty
+                      ? split.userName![0].toUpperCase()
+                      : (split.userId.length >= 2 ? split.userId.substring(0, 2).toUpperCase() : 'M')),
               style: TextStyle(
                 fontSize: isMe ? 24 : 16,
                 fontWeight: FontWeight.bold,
@@ -683,7 +694,11 @@ class _SharedExpenseDetailScreenState extends State<SharedExpenseDetailScreen> {
           children: [
             Flexible(
               child: Text(
-                isMe ? 'You' : 'Member ${split.userId.substring(0, 6)}',
+                isMe
+                    ? 'You'
+                    : (split.userName != null && split.userName!.isNotEmpty
+                        ? split.userName!
+                        : (split.userId.length >= 4 ? 'Member ${split.userId.substring(0, 4)}' : 'Member ${split.userId}')),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,

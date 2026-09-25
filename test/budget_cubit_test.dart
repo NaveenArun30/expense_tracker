@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:expense_tracker_app/core/budget_bloc/budget_cubit.dart';
-import 'package:expense_tracker_app/core/budget_bloc/budget_state.dart';
 import 'package:expense_tracker_app/services/preferences_service.dart';
 
 void main() {

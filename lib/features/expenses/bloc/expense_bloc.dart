@@ -307,6 +307,27 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     Emitter<ExpenseState> emit,
   ) async {
     try {
+      if (state is ExpenseLoaded) {
+        final currentExpenses = (state as ExpenseLoaded).expenses;
+        final matches = currentExpenses.where((e) => e.id == event.expenseId);
+        if (matches.isNotEmpty) {
+          final target = matches.first;
+          if (target.accountId != null && target.accountId!.isNotEmpty) {
+            final accounts = await SupabaseService.getAccounts(userId: userId);
+            try {
+              final account = accounts.firstWhere((acc) => acc.id == target.accountId);
+              final restoredBalance = account.balance + target.amount;
+              await SupabaseService.updateAccountBalance(
+                accountId: target.accountId!,
+                newBalance: restoredBalance,
+              );
+            } catch (e) {
+              print('Error restoring account balance on expense delete: $e');
+            }
+          }
+        }
+      }
+
       await SupabaseService.deleteExpense(event.expenseId);
       add(RefreshExpenses());
     } catch (e) {

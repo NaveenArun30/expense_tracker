@@ -38,7 +38,9 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    // We will initialize in build to guarantee latest state
+    context.read<SharedBloc>().add(LoadGroupDetails(widget.groupId));
+    final currentState = context.read<SharedBloc>().state;
+    _initializeMembersIfNeeded(currentState);
   }
 
   @override
@@ -52,18 +54,22 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
   }
 
   void _initializeMembersIfNeeded(SharedState state) {
-    if (!_initialized && state is GroupDetailsLoaded && state.group.id == widget.groupId) {
-      _members = state.members;
-      _includedMembers = _members.map((m) => m.userId).toSet();
-      for (var member in _members) {
-        _exactControllers[member.userId] = TextEditingController();
-        _percentControllers[member.userId] = TextEditingController();
+    if (state is GroupDetailsLoaded && state.group.id == widget.groupId) {
+      if (!_initialized || _members.length != state.members.length) {
+        _members = state.members;
+        _includedMembers = _members.map((m) => m.userId).toSet();
+        for (var member in _members) {
+          _exactControllers.putIfAbsent(member.userId, () => TextEditingController());
+          _percentControllers.putIfAbsent(member.userId, () => TextEditingController());
+        }
+        _initialized = true;
+        final amount = double.tryParse(_amountController.text) ?? 0;
+        _calculateSplits(amount, updateState: false);
       }
-      _initialized = true;
     }
   }
 
-  void _calculateSplits(double totalAmount) {
+  void _calculateSplits(double totalAmount, {bool updateState = true}) {
     if (_splitType == 'equal') {
       final newSplits = <String, double>{};
       if (_includedMembers.isNotEmpty) {
@@ -80,9 +86,13 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
           newSplits[member.userId] = 0;
         }
       }
-      setState(() {
+      if (updateState) {
+        setState(() {
+          _splitAmounts = newSplits;
+        });
+      } else {
         _splitAmounts = newSplits;
-      });
+      }
     } else if (_splitType == 'percentage') {
       final newSplits = <String, double>{};
       for (var member in _members) {
@@ -93,21 +103,27 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
           newSplits[member.userId] = 0;
         }
       }
-      setState(() {
+      if (updateState) {
+        setState(() {
+          _splitAmounts = newSplits;
+        });
+      } else {
         _splitAmounts = newSplits;
-      });
-    }
-    // For 'exact', _splitAmounts is updated directly via TextField onChanged,
-    // but we need to zero out excluded members.
-    else if (_splitType == 'exact') {
-      setState(() {
-         for (var member in _members) {
-           if (!_includedMembers.contains(member.userId)) {
-             _splitAmounts[member.userId] = 0;
-             _exactControllers[member.userId]?.text = '';
-           }
-         }
-      });
+      }
+    } else if (_splitType == 'exact') {
+      void updateExact() {
+        for (var member in _members) {
+          if (!_includedMembers.contains(member.userId)) {
+            _splitAmounts[member.userId] = 0;
+            _exactControllers[member.userId]?.text = '';
+          }
+        }
+      }
+      if (updateState) {
+        setState(updateExact);
+      } else {
+        updateExact();
+      }
     }
   }
 
@@ -534,13 +550,17 @@ class _AddSharedExpenseScreenState extends State<AddSharedExpenseScreen> {
                                           ? Colors.white
                                           : (AppConstants.isDark ? Colors.grey[300] : Colors.grey[700]),
                                       child: Text(
-                                        isMe ? 'You' : userId.substring(0, 1).toUpperCase(),
+                                        isMe
+                                            ? 'You'
+                                            : (member.displayName.isNotEmpty
+                                                ? member.displayName[0].toUpperCase()
+                                                : 'M'),
                                       ),
                                     ),
                                   ],
                                 ),
                                 title: Text(
-                                  isMe ? 'You' : 'Member ${userId.substring(0, 4)}',
+                                  isMe ? 'You' : member.displayName,
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600, 
                                     decoration: isIncluded ? TextDecoration.none : TextDecoration.lineThrough,

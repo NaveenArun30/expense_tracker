@@ -8,6 +8,7 @@ class SharedExpenseModel extends Equatable {
   final String paidBy; // User ID
   final DateTime date;
   final String category;
+  final String? payerName;
 
   const SharedExpenseModel({
     required this.id,
@@ -17,9 +18,10 @@ class SharedExpenseModel extends Equatable {
     required this.paidBy,
     required this.date,
     required this.category,
+    this.payerName,
   });
 
-  factory SharedExpenseModel.fromJson(Map<String, dynamic> json) {
+  factory SharedExpenseModel.fromJson(Map<String, dynamic> json, {String? payerName}) {
     return SharedExpenseModel(
       id: json['id'],
       groupId: json['group_id'],
@@ -28,6 +30,7 @@ class SharedExpenseModel extends Equatable {
       paidBy: json['paid_by'],
       date: DateTime.parse(json['date']),
       category: json['category'],
+      payerName: payerName ?? json['payer_name'],
     );
   }
 
@@ -51,6 +54,7 @@ class SharedExpenseModel extends Equatable {
     paidBy,
     date,
     category,
+    payerName,
   ];
 }
 
@@ -60,6 +64,7 @@ class ExpenseSplit extends Equatable {
   final String userId;
   final double amount;
   final String status; // 'pending' or 'paid'
+  final String? userName;
 
   const ExpenseSplit({
     required this.id,
@@ -67,18 +72,20 @@ class ExpenseSplit extends Equatable {
     required this.userId,
     required this.amount,
     this.status = 'pending',
+    this.userName,
   });
 
-  factory ExpenseSplit.fromJson(Map<String, dynamic> json) {
+  factory ExpenseSplit.fromJson(Map<String, dynamic> json, {String? userName}) {
     return ExpenseSplit(
       id: json['id'],
       expenseId: json['expense_id'],
       userId: json['user_id'],
       amount: (json['amount'] as num).toDouble(),
       status: json['status'] ?? 'pending',
+      userName: userName ?? json['user_name'],
     );
   }
 
   @override
-  List<Object?> get props => [id, expenseId, userId, amount, status];
+  List<Object?> get props => [id, expenseId, userId, amount, status, userName];
 }
